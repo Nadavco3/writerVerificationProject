@@ -19,13 +19,15 @@
 
       <form>
         <input type="text" id="login" class="fadeIn second" name="email" placeholder="Email">
-        <input type="text" id="password" class="fadeIn third" name="password" placeholder="Password">
+        <input type="password" id="password" class="fadeIn third" name="password" placeholder="Password">
         <input type="submit" class="fadeIn fourth" value="Log In">
       </form>
 
-      <div id="formFooter">
-        <a class="underlineHover" href="#">don't have an account? sign up here!</a>
-      </div>
+      <form id="form-signup" action="/signUp" method="get">
+        <div id="formFooter">
+          <a class="underlineHover" onclick="document.getElementById('form-signup').submit();">don't have an account? sign up here!</a>
+        </div>
+      </form>
     </div>
   </div>
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>

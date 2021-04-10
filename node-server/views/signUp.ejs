@@ -20,15 +20,17 @@
       <form>
         <input type="text" id="firstname" class="fadeIn second" name="firstname" placeholder="First Name">
         <input type="text" id="lastname" class="fadeIn third" name="lastname" placeholder="Last Name">
-        <input type="text" id="email" class="fadeIn fourth" name="email" placeholder="Email">
-        <input type="text" id="password" class="fadeIn fifth" name="password" placeholder="Password">
-        <input type="text" id="confirm-password" class="fadeIn sixth" name="confirmpassword" placeholder="Confirm Password">
+        <input type="email" id="email" class="fadeIn fourth" name="email" placeholder="Email">
+        <input type="password" id="password" class="fadeIn fifth" name="password" placeholder="Password">
+        <input type="password" id="confirm-password" class="fadeIn sixth" name="confirmpassword" placeholder="Confirm Password">
         <input type="submit" class="fadeIn seventh" value="Sign Up">
       </form>
 
-      <div id="formFooter">
-        <a class="underlineHover" href="#">have an account? Log in here!</a>
-      </div>
+      <form id ="form-login" action="/login" method="get">
+        <div id="formFooter">
+            <a class="underlineHover" onclick="document.getElementById('form-login').submit();">have an account? Log in here!</a>
+        </div>
+    </form>
     </div>
   </div>
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
