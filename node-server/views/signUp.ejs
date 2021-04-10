@@ -18,15 +18,20 @@
       </div>
 
       <form>
-        <input type="text" id="login" class="fadeIn second" name="email" placeholder="Email">
+        <input type="text" id="firstname" class="fadeIn second" name="firstname" placeholder="First Name">
+        <input type="text" id="lastname" class="fadeIn third" name="lastname" placeholder="Last Name">
+        <input type="text" id="email" class="fadeIn third" name="email" placeholder="email">
         <input type="text" id="password" class="fadeIn third" name="password" placeholder="Password">
-        <input type="submit" class="fadeIn fourth" value="Log In">
+        <input type="text" id="confirm-password" class="fadeIn third" name="confirmpassword" placeholder="Confirm Password">
+        <input type="submit" class="fadeIn fourth" value="Sign Up">
       </form>
 
       <div id="formFooter">
-        <a class="underlineHover" href="#">don't have an account? sign up here!</a>
+        <a class="underlineHover" href="#">have an account? Log in here!</a>
       </div>
     </div>
   </div>
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-  <%- include("partials/footer") %>
+    
+</body>  
+</html>

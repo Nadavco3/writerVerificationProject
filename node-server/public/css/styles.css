@@ -1,9 +1,5 @@
-.footer-padding {
-	padding-bottom: 60px;
-}
-
 .footer {
-	position: absolute;
+	position: sticky;
 	text-align: center;
 	bottom: 0;
 	width: 100%;
@@ -154,8 +150,7 @@ h2 {
   flex-direction: column;
   justify-content: center;
   width: 100%;
-  min-height: 100%;
-  padding: 130px;
+  min-height: 90%;
 }
 
 #formContent {
@@ -166,6 +161,7 @@ h2 {
   width: 90%;
   max-width: 450px;
   position: relative;
+  margin-bottom: 30px;
   padding: 0px;
   -webkit-box-shadow: 0 30px 60px 0 rgba(0,0,0,0.3);
   box-shadow: 0 30px 60px 0 rgba(0,0,0,0.3);
@@ -341,7 +337,6 @@ input[type=text]:placeholder {
 }
 
 .fadeIn.fourth {
-	margin-top: 30px;
   -webkit-animation-delay: 1s;
   -moz-animation-delay: 1s;
   animation-delay: 1s;
