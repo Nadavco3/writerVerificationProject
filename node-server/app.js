@@ -107,6 +107,14 @@ app.get('/my-documents', function(req,res){
   });
 });
 
+app.get('/login', function(req,res){
+  res.render("login");
+});
+
+app.get('/signup', function(req,res){
+  res.render("signUp");
+});
+
 app.get('/compare', function(req,res){
   fs.readdir(__dirname + '/public/userDocs', (err, files) => {
          if (err) console.log(err);
