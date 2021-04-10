@@ -42,7 +42,7 @@
   padding-top: 100px;
 }
 
-.carousel {
+.carousel-compare {
   display: none;
 }
 
@@ -101,6 +101,10 @@
   color: #bfc3c6;
   text-align: center;
   font-size: 18px;
+}
+
+.select-body {
+	padding-top: 50px;
 }
 
 .document-button {
