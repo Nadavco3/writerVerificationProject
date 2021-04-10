@@ -14,8 +14,6 @@
 }
 
 .upload-box {
-  /* margin-left: 40px;
-  padding-left: 260px; */
   margin: auto;
   width: 50%;
 }
@@ -29,11 +27,6 @@
 
 .carousel-caption {
   padding-top: 100px;
-}
-
-.carousel {
-  /* margin-left: 200px;
-  margin-right: 200px; */
 }
 
 .document-container {
@@ -53,9 +46,6 @@
 .zero-docs {
   width: 800px;
   height: 400px;
-  /* margin: auto;
-  padding: 100px 0px;
-  text-align: center; */
 }
 
 .zero-docs p {
@@ -258,6 +248,10 @@ input[type=text]:placeholder {
   color: #cccccc;
 }
 
+img{
+  height: 100px;
+  width: 50% !important;
+}
 
 
 /* ANIMATIONS */
@@ -341,6 +335,25 @@ input[type=text]:placeholder {
   -moz-animation-delay: 1s;
   animation-delay: 1s;
 }
+
+.fadeIn.fifth {
+  -webkit-animation-delay: 1.2s;
+  -moz-animation-delay: 1.2s;
+  animation-delay: 1.2s;
+}
+
+.fadeIn.sixth {
+  -webkit-animation-delay: 1.4s;
+  -moz-animation-delay: 1.4s;
+  animation-delay: 1.4s;
+}
+
+.fadeIn.seventh {
+  -webkit-animation-delay: 1.6s;
+  -moz-animation-delay: 1.6s;
+  animation-delay: 1.6s;
+}
+
 
 /* Simple CSS3 Fade-in Animation */
 .underlineHover:after {
