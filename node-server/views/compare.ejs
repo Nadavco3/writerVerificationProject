@@ -1,23 +1,146 @@
 <%- include("partials/header") %>
 
-<h1>Compare</h1>
+<script type="text/javascript">
+  let count = 0;
+
+  function chooseTargetDocument(){
+    var imgName = document.getElementById("targetDoc").value;
+    var targetImg = document.getElementById("targetImg").src = "/userDocs/" + imgName;
+    document.getElementById("zero-message-target").style.display = "none";
+    document.getElementById("chosen-doc").style.display = "block";
+  }
+  function addCompareDocument(){
+    document.getElementById("zero-message").style.display = "none";
+    document.getElementById("carouselExampleDark").style.display = "block";
+    var imgName = document.getElementById("compareDoc").value;
+    var itemDiv = document.createElement("div");
+    itemDiv.classList.add("carousel-item");
+    var img = document.createElement("img");
+    img.classList.add("chose-img");
+    img.src = "/userDocs/" + imgName;
+    img.width = 300;
+    img.height = 400;
+    itemDiv.appendChild(img);
+    var infoDiv = document.createElement("div");
+    infoDiv.classList.add("carousel-caption","d-none","d-md-block","manage-buttons");
+    docTitle = document.createElement("h5");
+    var node = document.createTextNode(imgName);
+    docTitle.appendChild(node);
+    infoDiv.appendChild(docTitle);
+    var buttonsDiv = document.createElement("div");
+    var buttonView = document.createElement("button");
+    buttonView.innerHTML = "View";
+    buttonView.classList.add("btn", "btn-primary" ,"document-button");
+    var buttonRemove = document.createElement("button");
+    buttonRemove.innerHTML = "Remove";
+    buttonRemove.classList.add("btn", "btn-danger" ,"document-button");
+    buttonsDiv.appendChild(buttonView);
+    buttonsDiv.appendChild(buttonRemove);
+    infoDiv.appendChild(buttonsDiv);
+    itemDiv.appendChild(infoDiv);
+    var items = document.getElementById("items");
+    items.appendChild(itemDiv);
+    count++;
+    var counter = document.getElementById("count").innerHTML = "Total: " + String(count);
+
+  }
+</script>
+
+<h2>Compare</h2>
 <div class="row">
-  <div class="col lg-4">
-    <h3>Choose Target Document</h3>
-    <select name="documentTarget">
-      <option>Document1</option>
-      <option>Document2</option>
-      <option>Document3</option>
-    </select>
+  <div class="col lg-5">
+    <h3 id="test" >Choose Target Document</h3>
+    <div class="choose-box">
+        <select class="form-select" id="targetDoc">
+        <%  docs.forEach(doc => { %>
+            <option value="<%= doc %>" ><%= doc %></option>
+        <% }); %>
+        </select>
+        <button class="btn btn-primary" onclick="chooseTargetDocument()" type="button" name="button">choose</button>
+    </div>
+    <div id="zero-message-target" class="zero-target-doc">
+      <p>You hav'nt selected target document</p>
+    </div>
+    <div id="chosen-doc" class="image-box">
+      <img src="Document2.png" id="targetImg" width=300 height=400 alt="">
+    </div>
   </div>
-  <div class="col-lg-8">
+  <div class="col-lg-7 verticalLine">
     <h3>Choose Documents To Compare</h3>
-    <select name="documentCompare">
-      <option>Document1</option>
-      <option>Document2</option>
-      <option>Document3</option>
-    </select>
+    <div class="choose-box">
+      <select class="form-select" id="compareDoc">
+        <%  docs.forEach(doc => { %>
+            <option><%= doc %></option>
+        <% }); %>
+      </select>
+      <button class="btn btn-primary" onClick="addCompareDocument()" type="button" name="button">Add</button>
+    </div>
+    <div class="img-box">
+      <h5 id="count">Total: 0</h5>
+      <div id="zero-message" class="zero-docs-compare">
+        <p>You hav'nt added any documents</p>
+      </div>
+      <div id="carouselExampleDark" class="carousel carousel-dark slide">
+        <div id="items" class="carousel-inner">
+              <div class="carousel-item active" >
+              <img class="chose-img" src="Document2.png" width=300 height=400 alt="...">
+              <div class="carousel-caption d-none d-md-block manage-buttons">
+                <h5>Document2.png</h5>
+                <div>
+                  <button type="button" class="btn btn-primary document-button" name="button">View</button>
+                  <button type="button" class="btn btn-danger document-button" name="button">Remove</button>
+                </div>
+              </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
+      </div>
+    </div>
+    <div class="horizontalLine">
+      <button class="btn btn-success" type="button" name="button">Compare</button>
+    </div>
+    <div class="results-box">
+      <h3>Results</h3>
+      <h5>Target Document Selected: Document4</h5>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Document Name</th>
+            <th scope="col">Compatibility</th>
+            <th scope="col">Model Assessment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="table-danger">
+            <th scope="row">1</th>
+            <td>Document1</td>
+            <td>47%</td>
+            <td>Not Same Writer</td>
+          </tr>
+          <tr class="table-success">
+            <th scope="row">2</th>
+            <td>Document2</td>
+            <td>93%</td>
+            <td>Same Writer</td>
+          </tr>
+          <tr class="table-warning">
+            <th scope="row">3</th>
+            <td>Document3</td>
+            <td>76%</td>
+            <td>Same Writer</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
-</div>
 
 <%- include("partials/footer") %>

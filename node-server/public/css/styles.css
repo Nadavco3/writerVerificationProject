@@ -3,17 +3,19 @@
 }
 
 .footer {
-	position: absolute;
+	position: sticky;
 	text-align: center;
 	bottom: 0;
 	width: 100%;
 	height: 60px;
 	background-color: #e4fbff;
+
 }
 
 .footer p {
 	margin-top: 25px;
 	font-size: 12px;
+	padding-top: 20px;
   color: #a6a7a8;
 }
 
@@ -24,6 +26,17 @@
   width: 50%;
 }
 
+.chose-img {
+	margin-left: 222px;
+  margin-right: 222px;
+  padding-bottom: 80px;
+}
+
+.manage-buttons {
+	padding-bottom: 0px;
+	padding-top: 0px;
+	margin-top: auto;
+}
 
 .doc-image {
   margin-left: 298px;
@@ -36,8 +49,7 @@
 }
 
 .carousel {
-  /* margin-left: 200px;
-  margin-right: 200px; */
+  display: none;
 }
 
 .document-container {
@@ -57,9 +69,6 @@
 .zero-docs {
   width: 800px;
   height: 400px;
-  /* margin: auto;
-  padding: 100px 0px;
-  text-align: center; */
 }
 
 .zero-docs p {
@@ -67,6 +76,34 @@
   padding-right: 50px;
   padding-top: 175px;
   padding-left: 175px;
+  color: #bfc3c6;
+  text-align: center;
+  font-size: 18px;
+}
+
+.zero-docs-compare {
+  width: inherit;
+  height: inherit;
+}
+
+.zero-docs-compare p{
+	padding-right: 100px;
+	padding-top: 170px;
+	padding-left: 100px;
+	color: #bfc3c6;
+	text-align: center;
+	font-size: 18px;
+}
+
+.zero-target-doc {
+	width: 526px;
+	height: 410px;
+}
+
+.zero-target-doc p {
+  padding-right: 100px;
+  padding-top: 200px;
+  padding-left: 100px;
   color: #bfc3c6;
   text-align: center;
   font-size: 18px;
@@ -80,8 +117,8 @@
 }
 
 .navbar {
-    padding-top: 15px;
-    padding-bottom: 15px;
+    padding-top: 5px;
+    padding-bottom: 5px;
     border: 0;
     border-radius: 0;
     margin-bottom: 0;
@@ -95,6 +132,41 @@
 
 input[type="file"]{
   width: 700px;
+}
+
+.choose-box {
+	display: flex;
+}
+
+.choose-box select {
+	margin-right: 5px;
+}
+
+.verticalLine {
+	border-left: 2px solid black;
+}
+
+.horizontalLine {
+	margin-top: 5px;
+	border-top: 2px solid black;
+	padding-top: 5px;
+}
+
+.horizontalLine button {
+	width: inherit;
+}
+
+.image-box {
+	padding-top: 10px;
+	display: none;
+}
+
+.image-box img{
+	border: 1px solid black;
+}
+
+.results-box {
+	padding-top: 20px;
 }
 
 .navbar-brand {

@@ -90,13 +90,28 @@ app.get('/my-documents', function(req,res){
           res.status(500).send('An error occurred', err);
       }
       else {
+        items.forEach(function(item){
+          filepath  = "userDocs/" + item.name + ".png"
+          fileContent = item.img.data.toString('base64');
+          try{
+            fs.writeFileSync(filepath, new Buffer(fileContent, "base64"));
+            var file = new Buffer(fileContent, "base64");
+          } catch (e){
+            console.log("Cannot write file ", e);
+            return;
+          }
+          console.log("file succesfully saved.");
+        });
           res.render('myDocuments', { items: items });
       }
   });
 });
 
 app.get('/compare', function(req,res){
-  res.render("compare");
+  fs.readdir(__dirname + '/public/userDocs', (err, files) => {
+         if (err) console.log(err);
+         res.render("compare",{docs: files});
+     });
 });
 
 app.get('/history', function(req,res){
@@ -139,6 +154,10 @@ app.get('/documents', function(req, res){
   });
 });
 
+function displayDocument(){
+  var imgName = document.getElementById("targetDoc").value;
+  console.log("imgName");
+}
 
 function deleteAllFilesInDirectory(dirName){
   fs.readdir(__dirname + '/' + dirName, (err, files) => {
