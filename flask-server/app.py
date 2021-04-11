@@ -11,14 +11,16 @@ app = Flask(__name__)
 @app.route('/flask', methods=['POST'])
 def index():
     targetDoc = request.files['targetDoc'].read()
-    compareDocs = request.files['compareDocs'].read()
-    npimg = np.fromstring(targetDoc, np.uint8)
+    print(request.files[0])
+    compareDocs = request.files['compareDocs'][0].read()
+    npimg = np.fromstring(compareDocs, np.uint8)
     img = cv2.imdecode(npimg,cv2.IMREAD_COLOR)
     img = remove_yellow(img)
     patches = convert_document_to_patches(img)
-    for i in range(len(patches)):
-        plt.imshow(patches[i], cmap='gray')
-        plt.show()
+    plt.imshow(img, cmap='gray')
+    # for i in range(len(patches)):
+    #     plt.imshow(patches[i], cmap='gray')
+    #     plt.show()
     return "Welcome to Flask Server"
 
 if __name__ == "__main__":
