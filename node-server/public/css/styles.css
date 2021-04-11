@@ -194,7 +194,6 @@ html {
 
 body {
   font-family: "Poppins", sans-serif;
-  height: 100vh;
 }
 
 a {
@@ -214,7 +213,9 @@ h2 {
   color: #cccccc;
 }
 
-
+.login {
+	height: 100vh;
+}
 
 /* STRUCTURE */
 

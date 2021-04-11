@@ -15,6 +15,7 @@ const app = express();
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({extended: true}));
 app.use(express.static("public"));
+app.use(bodyParser.json());
 
 
 //for image sending from server to python model server
@@ -147,6 +148,28 @@ app.get('/compare', function(req,res){
      });
 });
 
+app.post('/send-to-model', function(req,res){
+  console.log(req.body);
+  var docs = JSON.stringify(req.body);
+  docs = JSON.parse(docs);
+  var compareDocsArray = [];
+  for(var i=0; i<docs.compare.length; i++){
+    compareDocsArray.push(fs.createReadStream(__dirname + '/public/userDocs/' + docs.compare[i]));
+  };
+  options = {
+    targetDoc: fs.createReadStream(__dirname + '/public/userDocs/' + docs.target),
+    compareDocs: compareDocsArray
+  }
+  request.post({url:'http://127.0.0.1:5000/flask', formData: options}, function(error, response, body) {
+    console.error('error:', error); // Print the error
+    console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+    console.log('body:', body); // Print the data received
+    deleteAllFilesInDirectory("sendApi");
+    res.redirect('/compare'); //Display the response on the website
+  });
+
+});
+
 app.get('/history', function(req,res){
   res.render("history");
 });
@@ -187,10 +210,6 @@ app.get('/documents', function(req, res){
   });
 });
 
-function displayDocument(){
-  var imgName = document.getElementById("targetDoc").value;
-  console.log("imgName");
-}
 
 function deleteAllFilesInDirectory(dirName){
   fs.readdir(__dirname + '/' + dirName, (err, files) => {
