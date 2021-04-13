@@ -4,20 +4,36 @@
   let count = 0;
 
   function getDocuments(){
+    document.getElementById("loading").style.display = "block";
     var targetDoc = document.getElementById("targetImg").name;
     var compareDocs = [];
     var chosenDocs = document.getElementsByClassName("chose-img");
     for(var i=0; i<chosenDocs.length; i++){
       compareDocs.push(chosenDocs[i].name);
     }
-    console.log(compareDocs);
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "/send-to-model", true);
+    xhr.onreadystatechange = function () {
+      // In local files, status is 0 upon success in Mozilla Firefox
+      if(xhr.readyState === XMLHttpRequest.DONE) {
+        var status = xhr.status;
+        if (status === 0 || (status >= 200 && status < 400)) {
+          // The request has been completed successfully
+          showResultsInPage(xhr.responseText);
+        }
+      }
+    }
     xhr.setRequestHeader('Content-Type', "application/json;charset=UTF-8");
     xhr.send(JSON.stringify({
       target: targetDoc,
       compare: compareDocs
     }));
+  }
+
+  function showResultsInPage(result){
+    document.getElementById("loading").style.display = "none";
+    document.getElementsByClassName("results-box")[0].style.display = "block";
+    document.getElementById("resultTargetDocumentName").innerHTML = "Target Document Selected:\t" + result;
   }
 
   function chooseTargetDocument(){
@@ -34,10 +50,15 @@
     var imgName = document.getElementById("compareDoc").value;
     var itemDiv = document.createElement("div");
     itemDiv.classList.add("carousel-item");
+    itemDiv.id = count;
+    if(count == 0){
+      itemDiv.classList.add("active");
+    }
     var img = document.createElement("img");
     img.classList.add("chose-img");
     img.src = "/userDocs/" + imgName;
     img.name = imgName;
+    img.id = count;
     img.width = 300;
     img.height = 400;
     itemDiv.appendChild(img);
@@ -51,9 +72,13 @@
     var buttonView = document.createElement("button");
     buttonView.innerHTML = "View";
     buttonView.classList.add("btn", "btn-primary" ,"document-button");
+    buttonView.onclick = openDocumentInNewWindow;
+    buttonView.id = count;
     var buttonRemove = document.createElement("button");
     buttonRemove.innerHTML = "Remove";
     buttonRemove.classList.add("btn", "btn-danger" ,"document-button");
+    buttonRemove.id = count;
+    buttonRemove.onclick = removeSelectedDocument;
     buttonsDiv.appendChild(buttonView);
     buttonsDiv.appendChild(buttonRemove);
     infoDiv.appendChild(buttonsDiv);
@@ -62,11 +87,57 @@
     items.appendChild(itemDiv);
     count++;
     var counter = document.getElementById("count").innerHTML = "Total: " + String(count);
-
   }
+
+  function openDocumentInNewWindow(){
+    var docID = this.id;
+    var allDocs = document.getElementsByClassName("chose-img");
+    var documentToView;
+    for(var i=0; i<allDocs.length; i++){
+      if (allDocs[i].id == docID){
+          documentToView = allDocs[i];
+      }
+    }
+    if(documentToView){
+      var docWindow = window.open("/userDocs/" + documentToView.name, "Document", "width=500,height=700");
+    }
+  }
+
+  function removeSelectedDocument(){
+    var docID = this.id;
+    var documentToDelete;
+    allDocs = document.getElementsByClassName("carousel-item");
+    for(var i=0; i<allDocs.length; i++){
+      if (allDocs[i].id == docID){
+          documentToDelete = allDocs[i];
+      }
+    }
+    if(documentToDelete){
+      console.log("document removed");
+      if(documentToDelete.classList.contains("active") && count > 1){
+        for(var i=0; i<allDocs.length; i++){
+          if (allDocs[i] != documentToDelete){
+              allDocs[i].classList.add("active");
+          }
+        }
+      }
+      documentToDelete.remove();
+      count--;
+      var counter = document.getElementById("count").innerHTML = "Total: " + String(count);
+      if(count == 0){
+        document.getElementById("zero-message").style.display = "block";
+        document.getElementById("carouselExampleDark").style.display = "none";
+      }
+    }
+  }
+
 </script>
 
 <!-- <h2>Compare</h2> -->
+<div id="loading">
+  <img id="loading-image" src="Loading.gif" alt="Loading..." />
+  <h5>Your documents are being processed...</h5>
+</div>
 <div class="row select-body">
   <div class="col lg-5">
     <h3 id="test" >Choose Target Document</h3>
@@ -130,7 +201,7 @@
 </div>
     <div class="results-box">
       <h3>Results</h3>
-      <h5>Target Document Selected: Document4</h5>
+      <h5 id="resultTargetDocumentName" >Target Document Selected: </h5>
       <table class="table">
         <thead>
           <tr>
@@ -162,6 +233,5 @@
         </tbody>
       </table>
     </div>
-
 
 <%- include("partials/footer") %>

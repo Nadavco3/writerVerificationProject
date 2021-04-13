@@ -117,7 +117,7 @@ app.get('/my-documents', function(req,res){
       }
       else {
         items.forEach(function(item){
-          filepath  = "userDocs/" + item.name + ".png"
+          filepath  = "public/userDocs/" + item.name + ".png"
           fileContent = item.img.data.toString('base64');
           try{
             fs.writeFileSync(filepath, new Buffer(fileContent, "base64"));
@@ -164,8 +164,8 @@ app.post('/send-to-model', function(req,res){
     console.error('error:', error); // Print the error
     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
     console.log('body:', body); // Print the data received
-    deleteAllFilesInDirectory("sendApi");
-    res.redirect('/compare'); //Display the response on the website
+    // res.render("compare",{docs: documents, results: result}); //Display the response on the website
+    res.send(body);
   });
 
 });
