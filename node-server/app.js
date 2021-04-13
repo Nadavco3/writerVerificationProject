@@ -62,7 +62,7 @@ const userSchema = new mongoose.Schema({
   confirmpassword:String
 });
 
-const userModel = new mongoose.model('User',userModel);
+const userModel = new mongoose.model('User',userSchema);
 
 
 
