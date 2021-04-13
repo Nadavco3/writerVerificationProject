@@ -1,26 +1,47 @@
 // require("dotenv").config();
+//import libries
 const express = require("express");
 const ejs = require("ejs");
 const bodyParser = require("body-parser");
 const mongoose = require('mongoose');
 const request = require('request');
 const fs = require('fs');
-var path = require('path');
-var multer = require('multer');
+const path = require('path');
+const multer = require('multer');
 const Jimp = require("jimp");
 
 const app = express();
 
 app.set('view engine', 'ejs');
-
 app.use(express.urlencoded({extended: true}));
 app.use(express.static("public"));
 app.use(bodyParser.json());
 
+
+//for image sending from server to python model server
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+      cb(null, 'uploads')
+  },
+  filename: (req, file, cb) => {
+      cb(null, file.fieldname + '-' + Date.now())
+  }
+});
+
+const upload = multer({ storage: storage });
+
+
+
+//mongo db connection
 mongoDBurl = "mongodb+srv://admin-nadav:123@cluster0.x9oen.mongodb.net/testDB";
 mongoose.connect(mongoDBurl, {useNewUrlParser: true, useUnifiedTopology: true });
 
-var imageSchema = new mongoose.Schema({
+
+
+//<--------data base collections schema--------->
+
+//image schema for mongo db
+const imageSchema = new mongoose.Schema({
     name: String,
     userID: String,
     img:
@@ -29,29 +50,33 @@ var imageSchema = new mongoose.Schema({
         contentType: String
     }
 });
+const imgModel = new mongoose.model('Image', imageSchema);
 
-var storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads')
-    },
-    filename: (req, file, cb) => {
-        cb(null, file.fieldname + '-' + Date.now())
-    }
+//users schema for mongo db
+
+const userSchema = new mongoose.Schema({
+  firstname: String,
+  lastname:String,
+  email:String,
+  password:String,
+  confirmpassword:String
 });
 
-var upload = multer({ storage: storage });
-var imgModel = new mongoose.model('Image', imageSchema);
+const userModel = new mongoose.model('User',userModel);
+
+
 
 app.get('/', (req, res) => {
-    imgModel.find({}, (err, items) => {
-        if (err) {
-            console.log(err);
-            res.status(500).send('An error occurred', err);
-        }
-        else {
-            res.render('imagesPage', { items: items });
-        }
-    });
+    // imgModel.find({}, (err, items) => {
+    //     if (err) {
+    //         console.log(err);
+    //         res.status(500).send('An error occurred', err);
+    //     }
+    //     else {
+    //         res.render('imagesPage', { items: items });
+    //     }
+    // });
+    res.render('login');
 });
 
 app.post('/upload',upload.single('image'),(req, res, next) => {
