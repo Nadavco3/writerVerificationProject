@@ -340,7 +340,6 @@ def split_into_patches(img,num_of_patches):
         x2 += 400
     if counter < num_of_patches:
         split_into_patches_random(img,num_of_patches,counter,patches)
-    print(patches)
     return patches
     
 
@@ -367,6 +366,13 @@ def convert_document_to_patches(img):
             return split_into_patches(img,15)
         except AttributeError:
             print('cannot find text box')
+
+def preparePatchesToModel(patches):
+    for i in range(len(patches)):
+        patches[i] = np.resize(patches[i],(150, 150))
+        patches[i] = patches[i].reshape(patches[i].shape[0],patches[i].shape[1],1)
+        patches[i] = np.array(patches[i], dtype = np.float32)
+        patches[i]/=255
 
 def saveTextbox():
     document_name_list = os.listdir('./HandwrittenForms_paragraphs/')

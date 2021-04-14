@@ -19,7 +19,7 @@
         var status = xhr.status;
         if (status === 0 || (status >= 200 && status < 400)) {
           // The request has been completed successfully
-          showResultsInPage(xhr.responseText);
+          showResultsInPage(xhr.responseText,targetDoc,compareDocs);
         }
       }
     }
@@ -30,10 +30,42 @@
     }));
   }
 
-  function showResultsInPage(result){
+  function showResultsInPage(result,target,compare){
     document.getElementById("loading").style.display = "none";
     document.getElementsByClassName("results-box")[0].style.display = "block";
-    document.getElementById("resultTargetDocumentName").innerHTML = "Target Document Selected:\t" + result;
+    document.getElementById("resultTargetDocumentName").innerHTML = "Target Document Selected: " + "&emsp;" + "<b>"+target+"</b>";
+    var table = document.getElementById("table-body");
+    var row,head,precent,doc_name,doc_precent,model_asses;
+    result = JSON.parse(result);
+    console.log(result);
+    for(var i=0; i<compare.length; i++){
+      row = document.createElement("tr");
+      head = document.createElement("th");
+      head.scope = "row";
+      head.innerHTML = i+1;
+      doc_name = document.createElement("td");
+      doc_name.innerHTML = compare[i];
+      doc_precent = document.createElement("td");
+      precent = result[i]*100;
+      console.log(precent);
+      doc_precent.innerHTML = String(precent) + "%";
+      model_asses = document.createElement("td");
+      if(precent < 50){
+        row.classList.add("table-danger");
+        model_asses.innerHTML = "Not Same Writer";
+      }else if(precent >= 50 && precent < 75){
+        row.classList.add("table-warning");
+        model_asses.innerHTML = "Could Be The Same Writer";
+      }else if(precent >= 75){
+        row.classList.add("table-success");
+        model_asses.innerHTML = "Same Writer";
+      }
+      row.appendChild(head);
+      row.appendChild(doc_name);
+      row.appendChild(doc_precent);
+      row.appendChild(model_asses);
+      table.appendChild(row);
+    }
   }
 
   function chooseTargetDocument(){
@@ -211,8 +243,8 @@
             <th scope="col">Model Assessment</th>
           </tr>
         </thead>
-        <tbody>
-          <tr class="table-danger">
+        <tbody id="table-body">
+          <!-- <tr class="table-danger">
             <th scope="row">1</th>
             <td>Document1</td>
             <td>47%</td>
@@ -229,7 +261,7 @@
             <td>Document3</td>
             <td>76%</td>
             <td>Same Writer</td>
-          </tr>
+          </tr> -->
         </tbody>
       </table>
     </div>
