@@ -1,12 +1,34 @@
 from flask import Flask
 from flask import request
+from flask import jsonify
 import numpy as np
 import cv2
+import keras
+from keras.models import Model
 import matplotlib.pyplot as plt
 from preprocessing import *
 
 
 app = Flask(__name__)
+
+model = keras.models.load_model('modelGoodResults2.h5')
+
+def predictByModel(target,compare):
+    target = convert_document_to_patches(target)
+    preparePatchesToModel(target)
+    print('target ',np.array(target).shape)
+    for i in range(len(compare)):
+        compare[i] = convert_document_to_patches(compare[i])
+        preparePatchesToModel(compare[i])
+    print('compare ',np.array(compare[0]).shape)
+    results=[]
+    for i in range(len(compare)):
+        predictions = model.predict([np.array(target),np.array(compare[i])]) > 0.70
+        finalResult = np.sum(predictions) / 15 
+        results.append(finalResult)
+    print(results)
+    return jsonify(results)
+    
 
 @app.route('/flask', methods=['POST'])
 def index():
@@ -21,9 +43,9 @@ def index():
         # plt.imshow(img, cmap='gray')
         # plt.show()
         compareDocs.append(img)
-    # img = remove_yellow(img)
-    # patches = convert_document_to_patches(img)
-    return "Welcome to Flask Server"
+    results = predictByModel(targetDoc,compareDocs)
+    
+    return results
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
