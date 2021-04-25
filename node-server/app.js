@@ -9,6 +9,8 @@ const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const Jimp = require("jimp");
+const session = require("express-session");
+const bcrypt = require("bcrypt");
 
 const app = express();
 
@@ -16,7 +18,6 @@ app.set('view engine', 'ejs');
 app.use(express.urlencoded({extended: true}));
 app.use(express.static("public"));
 app.use(bodyParser.json());
-
 
 //for image sending from server to python model server
 const storage = multer.diskStorage({
@@ -30,12 +31,20 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+const saltRounds = 10;
+
+app.use(session({
+  secret: 'keyboard cat',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {maxAge: 60000}
+}));
 
 
 //mongo db connection
 mongoDBurl = "mongodb+srv://admin-nadav:123@cluster0.x9oen.mongodb.net/testDB";
 mongoose.connect(mongoDBurl, {useNewUrlParser: true, useUnifiedTopology: true });
-
+mongoose.set("useCreateIndex",true);
 
 
 //<--------data base collections schema--------->
@@ -58,24 +67,12 @@ const userSchema = new mongoose.Schema({
   firstname: String,
   lastname:String,
   email:String,
-  password:String,
-  confirmpassword:String
+  password: String
 });
 
-const userModel = new mongoose.model('User',userSchema);
-
-
+const User = new mongoose.model('User',userSchema);
 
 app.get('/', (req, res) => {
-    // imgModel.find({}, (err, items) => {
-    //     if (err) {
-    //         console.log(err);
-    //         res.status(500).send('An error occurred', err);
-    //     }
-    //     else {
-    //         res.render('imagesPage', { items: items });
-    //     }
-    // });
     res.render('login');
 });
 
@@ -110,35 +107,77 @@ app.post('/upload',upload.single('image'),(req, res, next) => {
 });
 
 app.get('/my-documents', function(req,res){
-  imgModel.find({}, (err, items) => {
-      if (err) {
-          console.log(err);
-          res.status(500).send('An error occurred', err);
-      }
-      else {
-        items.forEach(function(item){
-          filepath  = "public/userDocs/" + item.name + ".png"
-          fileContent = item.img.data.toString('base64');
-          try{
-            fs.writeFileSync(filepath, new Buffer(fileContent, "base64"));
-            var file = new Buffer(fileContent, "base64");
-          } catch (e){
-            console.log("Cannot write file ", e);
-            return;
-          }
-          console.log("file succesfully saved.");
-        });
-          res.render('myDocuments', { items: items });
-      }
-  });
+  if(typeof req.session.User === 'undefined'){
+        res.render("login");
+  } else {
+    console.log(req.session.User);
+    imgModel.find({}, (err, items) => {
+        if (err) {
+            console.log(err);
+            res.status(500).send('An error occurred', err);
+        }
+        else {
+          items.forEach(function(item){
+            filepath  = "public/userDocs/" + item.name + ".png"
+            fileContent = item.img.data.toString('base64');
+            try{
+              fs.writeFileSync(filepath, new Buffer(fileContent, "base64"));
+              var file = new Buffer(fileContent, "base64");
+            } catch (e){
+              console.log("Cannot write file ", e);
+              return;
+            }
+            console.log("file succesfully saved.");
+          });
+            res.render('myDocuments', { items: items });
+        }
+    });
+  }
 });
 
 app.get('/login', function(req,res){
   res.render("login");
 });
 
+app.post('/confirm-login' ,function(req,res){
+  var email = req.body.email;
+  var password = req.body.password;
+  User.findOne({email: email}, function(err, user){
+    if(err){
+      console.log(err);
+      res.redirect("/login");
+    } else {
+      if(user){
+        bcrypt.compare(password, user.password, function(err, result) {
+          if(result === true){
+            req.session.User = user._id;
+            res.redirect("/my-documents");
+          } else {
+            res.redirect("/login");
+          }
+        });
+      }
+    }
+  });
+});
+
 app.get('/signup', function(req,res){
   res.render("signUp");
+});
+
+app.post('/add-new-user',function(req,res){
+  bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+    var newUser = new User({
+      firstname: req.body.firstname,
+      lastname: req.body.lastname,
+      email: req.body.email,
+      password: hash
+    });
+    newUser.save();
+    req.session.User = newUser._id;
+    res.redirect("/my-documents");
+  });
+
 });
 
 app.get('/compare', function(req,res){
