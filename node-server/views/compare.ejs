@@ -1,16 +1,16 @@
 <%- include("partials/header") %>
-
 <script type="text/javascript">
   let count = 0;
 
   function getDocuments(){
     document.getElementById("loading").style.display = "block";
-    var targetDoc = document.getElementById("targetImg").name;
+    var targetDoc = {name: document.getElementById("targetImg").name, id: document.getElementById("targetImg").dataset.id};
     var compareDocs = [];
     var chosenDocs = document.getElementsByClassName("chose-img");
     for(var i=0; i<chosenDocs.length; i++){
-      compareDocs.push(chosenDocs[i].name);
+      compareDocs.push({name: chosenDocs[i].name, id: chosenDocs[i].dataset.id});
     }
+    console.log(compareDocs);
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "/send-to-model", true);
     xhr.onreadystatechange = function () {
@@ -33,7 +33,7 @@
   function showResultsInPage(result,target,compare){
     document.getElementById("loading").style.display = "none";
     document.getElementsByClassName("results-box")[0].style.display = "block";
-    document.getElementById("resultTargetDocumentName").innerHTML = "Target Document Selected: " + "&emsp;" + "<b>"+target+"</b>";
+    document.getElementById("resultTargetDocumentName").innerHTML = "Target Document Selected: " + "&emsp;" + "<b>"+target.name+"</b>";
     var table = document.getElementById("table-body");
     var row,head,precent,doc_name,doc_precent,model_asses;
     result = JSON.parse(result);
@@ -44,7 +44,7 @@
       head.scope = "row";
       head.innerHTML = i+1;
       doc_name = document.createElement("td");
-      doc_name.innerHTML = compare[i];
+      doc_name.innerHTML = compare[i].name;
       doc_precent = document.createElement("td");
       precent = result[i]*100;
       console.log(precent);
@@ -69,17 +69,20 @@
   }
 
   function chooseTargetDocument(){
-    var imgName = document.getElementById("targetDoc").value;
+    var doc = document.getElementById("targetDoc");
     var targetImg = document.getElementById("targetImg");
-    targetImg.src = "/userDocs/" + imgName;
-    targetImg.name = imgName;
+    targetImg.src = doc.options[doc.selectedIndex].value;
+    // targetImg.src = "/userDocs/" + imgName;
+    targetImg.name = doc.options[doc.selectedIndex].dataset.name;
+    targetImg.dataset.id = doc.options[doc.selectedIndex].dataset.id;
     document.getElementById("zero-message-target").style.display = "none";
     document.getElementById("chosen-doc").style.display = "block";
   }
+
   function addCompareDocument(){
     document.getElementById("zero-message").style.display = "none";
     document.getElementById("carouselExampleDark").style.display = "block";
-    var imgName = document.getElementById("compareDoc").value;
+    var doc = document.getElementById("compareDoc");
     var itemDiv = document.createElement("div");
     itemDiv.classList.add("carousel-item");
     itemDiv.id = count;
@@ -88,8 +91,10 @@
     }
     var img = document.createElement("img");
     img.classList.add("chose-img");
-    img.src = "/userDocs/" + imgName;
-    img.name = imgName;
+    // img.src = "/userDocs/" + imgName;
+    img.src = doc.options[doc.selectedIndex].value;
+    img.name = doc.options[doc.selectedIndex].dataset.name;
+    img.dataset.id = doc.options[doc.selectedIndex].dataset.id;
     img.id = count;
     img.width = 300;
     img.height = 400;
@@ -97,7 +102,8 @@
     var infoDiv = document.createElement("div");
     infoDiv.classList.add("carousel-caption","d-none","d-md-block","manage-buttons");
     docTitle = document.createElement("h5");
-    var node = document.createTextNode(imgName);
+    var node = document.createTextNode(img.name);
+    console.log(doc.name);
     docTitle.appendChild(node);
     infoDiv.appendChild(docTitle);
     var buttonsDiv = document.createElement("div");
@@ -131,7 +137,9 @@
       }
     }
     if(documentToView){
-      var docWindow = window.open("/userDocs/" + documentToView.name, "Document", "width=500,height=700");
+      // var docWindow = window.open("/userDocs/" + documentToView.name, "Document", "width=500,height=700");
+      var docWindow = window.open("", "Document", "width=500,height=700");
+      docWindow.document.write("<img width=500 height=700 src="+documentToView.src+">");
     }
   }
 
@@ -164,7 +172,7 @@
   }
 
 </script>
-
+<p value="<%=docs%>" id="docs" style="display:none"></p>
 <!-- <h2>Compare</h2> -->
 <div id="loading">
   <img id="loading-image" src="Loading.gif" alt="Loading..." />
@@ -176,7 +184,7 @@
     <div class="choose-box">
         <select class="form-select" id="targetDoc">
         <%  docs.forEach(doc => { %>
-            <option value="<%= doc %>" ><%= doc %></option>
+            <option data-name="<%= doc.name %>" data-id="<%=doc._id%>" value="data:image/<%=doc.img.contentType%>;base64,<%=doc.img.data.toString('base64')%>" ><%= doc.name %></option>
         <% }); %>
         </select>
         <button class="btn btn-primary" onclick="chooseTargetDocument()" type="button" name="button">choose</button>
@@ -193,7 +201,7 @@
     <div class="choose-box">
       <select class="form-select" id="compareDoc">
         <%  docs.forEach(doc => { %>
-            <option><%= doc %></option>
+            <option data-id="<%=doc._id%>" data-name="<%=doc.name%>" value="data:image/<%=doc.img.contentType%>;base64,<%=doc.img.data.toString('base64')%>" ><%= doc.name %></option>
         <% }); %>
       </select>
       <button class="btn btn-primary" onClick="addCompareDocument()" type="button" name="button">Add</button>

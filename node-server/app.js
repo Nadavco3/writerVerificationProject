@@ -25,7 +25,7 @@ const storage = multer.diskStorage({
       cb(null, 'uploads')
   },
   filename: (req, file, cb) => {
-      cb(null, file.fieldname + '-' + Date.now())
+      cb(null, file.originalname.split('.')[0])
   }
 });
 
@@ -37,7 +37,7 @@ app.use(session({
   secret: 'keyboard cat',
   resave: false,
   saveUninitialized: false,
-  cookie: {maxAge: 60000}
+  cookie: {maxAge: 600000}
 }));
 
 
@@ -77,9 +77,19 @@ app.get('/', (req, res) => {
 });
 
 app.post('/upload',upload.single('image'),(req, res, next) => {
+  // console.log(req.body);
+  // var fullPath = req.body.image.value;
+  // if (fullPath) {
+  //     var startIndex = (fullPath.indexOf('\\') >= 0 ? fullPath.lastIndexOf('\\') : fullPath.lastIndexOf('/'));
+  //     var filename = fullPath.substring(startIndex);
+  //     if (filename.indexOf('\\') === 0 || filename.indexOf('/') === 0) {
+  //         filename = filename.substring(1);
+  //     }
+  //     console.log(filename);
+  // }
     var obj = {
-        name: "test2",
-        desc: "desc",
+        name: req.file.filename,
+        userID: req.session.User,
         img: {
             data: fs.readFileSync(path.join(__dirname + '/uploads/' + req.file.filename)),
             contentType: 'image/png'
@@ -118,16 +128,16 @@ app.get('/my-documents', function(req,res){
         }
         else {
           items.forEach(function(item){
-            filepath  = "public/userDocs/" + item.name + ".png"
-            fileContent = item.img.data.toString('base64');
-            try{
-              fs.writeFileSync(filepath, new Buffer(fileContent, "base64"));
-              var file = new Buffer(fileContent, "base64");
-            } catch (e){
-              console.log("Cannot write file ", e);
-              return;
-            }
-            console.log("file succesfully saved.");
+            // filepath  = "public/userDocs/" + item.name + ".png"
+            // fileContent = item.img.data.toString('base64');
+            // try{
+            //   fs.writeFileSync(filepath, new Buffer(fileContent, "base64"));
+            //   var file = new Buffer(fileContent, "base64");
+            // } catch (e){
+            //   console.log("Cannot write file ", e);
+            //   return;
+            // }
+            // console.log("file succesfully saved.");
           });
             res.render('myDocuments', { items: items });
         }
@@ -181,22 +191,37 @@ app.post('/add-new-user',function(req,res){
 });
 
 app.get('/compare', function(req,res){
-  fs.readdir(__dirname + '/public/userDocs', (err, files) => {
-         if (err) console.log(err);
-         res.render("compare",{docs: files});
-     });
+  // fs.readdir(__dirname + '/public/userDocs', (err, files) => {
+  //        if (err) console.log(err);
+  //        res.render("compare",{docs: files});
+  //    });
+  imgModel.find({userID: req.session.User}, (err, items) => {
+      if (err) {
+          console.log(err);
+          res.status(500).send('An error occurred', err);
+      }
+      else {
+        items.forEach(function(item){
+        });
+          res.render('compare', { docs: items });
+      }
+  });
 });
 
-app.post('/send-to-model', function(req,res){
+app.post('/send-to-model', async function(req,res){
   console.log(req.body);
   var docs = JSON.stringify(req.body);
   docs = JSON.parse(docs);
+  var target = await imgModel.findById(docs.target.id).exec();
+  saveDocumentFile(req.session.User, target.name, target.img.data);
   var compareDocsArray = [];
   for(var i=0; i<docs.compare.length; i++){
-    compareDocsArray.push(fs.createReadStream(__dirname + '/public/userDocs/' + docs.compare[i]));
+    var compare = await imgModel.findById(docs.compare[i].id).exec();
+    saveDocumentFile(req.session.User, compare.name, compare.img.data);
+    compareDocsArray.push(fs.createReadStream(__dirname + '/public/userDocs/' + req.session.User + '/' + compare.name + '.png'));
   };
   options = {
-    targetDoc: fs.createReadStream(__dirname + '/public/userDocs/' + docs.target),
+    targetDoc: fs.createReadStream(__dirname + '/public/userDocs/' + req.session.User + '/' + target.name + '.png'),
     compareDocs: compareDocsArray
   }
   //'http://127.0.0.1:5000/flask'
@@ -250,6 +275,26 @@ app.get('/documents', function(req, res){
   });
 });
 
+function saveDocumentFile(user_id ,name, content){
+  var dir = "public/userDocs/" + user_id;
+  if (!fs.existsSync(dir)){
+      fs.mkdirSync(dir);
+  }
+  filepath  = dir + "/" + name + ".png"
+  if (fs.existsSync(filepath)) {
+    console.log("file exists");
+    return;
+  }
+  fileContent = content.toString('base64');
+  try{
+    fs.writeFileSync(filepath, new Buffer(fileContent, "base64"));
+    var file = new Buffer(fileContent, "base64");
+  } catch (e){
+    console.log("Cannot write file ", e);
+    return;
+  }
+  console.log("file succesfully saved.");
+}
 
 function deleteAllFilesInDirectory(dirName){
   fs.readdir(__dirname + '/' + dirName, (err, files) => {

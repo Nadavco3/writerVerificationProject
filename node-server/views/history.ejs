@@ -1,5 +1,22 @@
 <%- include("partials/header") %>
 
 <h1>History</h1>
+<form class="" action="/search-history" method="post">
+  <div class="query">
+    <div class="dateChoose" >
+      <label class="form-label" for="date">Date</label>
+      <input type="date" id="date" name="" value="">
+    </div>
+    <div class="documentChoose">
+      <select class="form-select" id="documentName" value="">
+        <option value="">Choose Document</option>
+      </select>
+    </div>
+    <div class="searchButton">
+      <button class="btn btn-primary" type="submit" name="button">Show</button>
+    </div>
+  </div>
+</form>
+
 
 <%- include("partials/footer") %>
