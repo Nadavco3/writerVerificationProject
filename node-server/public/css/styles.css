@@ -209,6 +209,41 @@ input[type="file"]{
     color: #7868e6 !important;
 }
 
+/* History */
+
+.query {
+	display: flex;
+	font-size: 18px;
+}
+
+.searchButton {
+	width: 10%;
+}
+
+.searchButton button{
+	float: right;
+}
+
+.documentChoose {
+	width: 50%;
+}
+
+.documentChoose select{
+  width: 100%;
+}
+
+.dateChoose {
+	width: 40%;
+}
+
+.dateChoose input[type="date"] {
+	width: 85%;
+	text-align: left;
+	height: 100%;
+	margin-left: auto;
+}
+
+
 /* BASIC */
 
 html {
