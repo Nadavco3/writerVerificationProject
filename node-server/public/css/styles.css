@@ -1,5 +1,9 @@
+html,body{
+	height: 100%;
+}
+
 .footer {
-	position: sticky;
+	position: absolute;
 	text-align: center;
 	bottom: 0;
 	width: 100%;
@@ -9,7 +13,7 @@
 }
 
 .footer p {
-	margin-top: 25px;
+	/* margin-top: 25px; */
 	font-size: 12px;
 	padding-top: 20px;
   color: #a6a7a8;
@@ -243,6 +247,37 @@ input[type="file"]{
 	margin-left: auto;
 }
 
+.collapsible {
+  background-color: #777;
+  color: white;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 18px;
+}
+
+.active-record, .collapsible:hover {
+  background-color: #555;
+}
+
+.content {
+  padding: 18px 18px;
+  display: none;
+  overflow: hidden;
+  background-color: #f1f1f1;
+}
+
+.history-records {
+	padding-top: 10px;
+}
+
+.export {
+	float: right;
+	margin-top: -50px;
+}
 
 /* BASIC */
 

@@ -11,7 +11,8 @@ const multer = require('multer');
 const Jimp = require("jimp");
 const session = require("express-session");
 const bcrypt = require("bcrypt");
-
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+const ObjectsToCsv = require('objects-to-csv');
 const app = express();
 
 app.set('view engine', 'ejs');
@@ -32,6 +33,15 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 const saltRounds = 10;
+
+const csvWriter = createCsvWriter({
+  path: 'records.csv',
+  header: [
+    {id: 'date', title: 'Date'},
+    {id: 'target', title: 'Target Document Name'},
+    {id: 'compare', title: 'Compared Documents'}
+  ]
+});
 
 app.use(session({
   secret: 'keyboard cat',
@@ -71,6 +81,21 @@ const userSchema = new mongoose.Schema({
 });
 
 const User = new mongoose.model('User',userSchema);
+
+//history schema for mongo db
+
+const historySchema = new mongoose.Schema({
+  userID: String,
+  date: String,
+  target: String,
+  compare: [{
+    name: String,
+    compatibility: Number,
+    assessment: String
+  }]
+});
+
+const History = new mongoose.model('History', historySchema);
 
 app.get('/', (req, res) => {
     res.render('login');
@@ -215,8 +240,10 @@ app.post('/send-to-model', async function(req,res){
   var target = await imgModel.findById(docs.target.id).exec();
   saveDocumentFile(req.session.User, target.name, target.img.data);
   var compareDocsArray = [];
+  var compareHistory = [];
   for(var i=0; i<docs.compare.length; i++){
     var compare = await imgModel.findById(docs.compare[i].id).exec();
+    compareHistory.push({name: compare.name});
     saveDocumentFile(req.session.User, compare.name, compare.img.data);
     compareDocsArray.push(fs.createReadStream(__dirname + '/public/userDocs/' + req.session.User + '/' + compare.name + '.png'));
   };
@@ -231,12 +258,57 @@ app.post('/send-to-model', async function(req,res){
     console.log('body:', body); // Print the data received
     // res.render("compare",{docs: documents, results: result}); //Display the response on the website
     res.send(body);
+    body = JSON.parse(body);
+    for(var i=0; i<compareHistory.length; i++){
+      var result = parseFloat(body[i])*100;
+      compareHistory[i].compatibility = result;
+      compareHistory[i].assessment = result < 50 ? "Not Same Writer" : result >= 50 && result < 75 ? "Could Be Same Writer" : "Same Writer";
+    }
+    console.log(compareHistory);
+    var newRecord = new History({
+      userID: req.session.User,
+      date: new Date().toISOString().split('T')[0],
+      target: target.name,
+      compare: compareHistory
+    });
+    newRecord.save();
   });
 
 });
 
-app.get('/history', function(req,res){
-  res.render("history");
+app.get('/history', async function(req,res){
+  userDocs = await imgModel.find({userID: req.session.User}).exec();
+  History.find({userID: req.session.User}, async function(err, recordsFound){
+    if (err) {
+        console.log(err);
+        res.status(500).send('An error occurred', err);
+    }
+    else {
+      var newRecords = [
+          {
+            date: "27-04-2021",
+            target: "Document1",
+            compareDocumentName: [
+              "Document2", "Document3"
+            ],
+            compatibility: [
+              "100", "56"
+            ],
+            assesment: [
+              "Same Writer", "Not Same Writer"
+            ]
+          }
+      ]
+      const csv = new ObjectsToCsv(newRecords);
+      await csv.toDisk('./test.csv');
+      // csvWriter.writeRecords(recordsFound).then(()=> console.log('The CSV file was written successfully'));
+      res.render("history",{docs: userDocs, records: recordsFound});
+    }
+  });
+});
+
+app.post('/search-history', function(req,res){
+  console.log(req.body);
 });
 
 app.get('/model', function(req,res){

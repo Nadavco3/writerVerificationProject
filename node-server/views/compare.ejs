@@ -33,6 +33,7 @@
   function showResultsInPage(result,target,compare){
     document.getElementById("loading").style.display = "none";
     document.getElementsByClassName("results-box")[0].style.display = "block";
+    document.getElementsByClassName("footer")[0].style.position = "sticky";
     document.getElementById("resultTargetDocumentName").innerHTML = "Target Document Selected: " + "&emsp;" + "<b>"+target.name+"</b>";
     var table = document.getElementById("table-body");
     var row,head,precent,doc_name,doc_precent,model_asses;
@@ -65,6 +66,7 @@
       row.appendChild(doc_precent);
       row.appendChild(model_asses);
       table.appendChild(row);
+      document.getElementsByClassName("body")[0].style.height = "max-content";
     }
   }
 

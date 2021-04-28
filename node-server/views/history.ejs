@@ -5,11 +5,14 @@
   <div class="query">
     <div class="dateChoose" >
       <label class="form-label" for="date">Date</label>
-      <input type="date" id="date" name="" value="">
+      <input type="date" id="date" name="date" value="">
     </div>
     <div class="documentChoose">
-      <select class="form-select" id="documentName" value="">
-        <option value="">Choose Document</option>
+      <select class="form-select" id="documentName" name="document" value="">
+        <option value="">All Documents</option>
+        <%  docs.forEach(doc => { %>
+            <option value="<%=doc.name%>" ><%= doc.name %></option>
+        <% }); %>
       </select>
     </div>
     <div class="searchButton">
@@ -17,6 +20,62 @@
     </div>
   </div>
 </form>
+<div class="history-records">
+<%  records.forEach(record => {  %>
+    <button type="button" class="collapsible"><i class="fas fa-chevron-down"></i>&emsp;<%=record.date%>&emsp;<%=record.target%></button>
+    <div class="content">
+      <h5><%=record.date%></h5>
+      <h5 id="resultTargetDocumentName" >Target Document Selected: &emsp;<%=record.target%></h5>
+      <button type="button" class="btn btn-primary export" name="button">Export to CSV</button>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Document Name</th>
+            <th scope="col">Compatibility</th>
+            <th scope="col">Model Assessment</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <%record.compare.forEach((document,i) => {%>
+            <% var tableClass = "table-success" %>
+            <% if (document.compatibility < 50){ %>
+            <%  tableClass = "table-danger";%>
+            <%} else if(document.compatibility >= 50 && document.compatibility < 75){%>
+            <%  tableClass = "table-warning"; %>
+            <%}%>
+            <tr class=<%=tableClass%>>
+              <th scope="row"><%=i+1%></th>
+              <td><%=document.name%></td>
+              <td><%=document.compatibility%></td>
+              <td><%=document.assessment%></td>
+            </tr>
+          <%})%>
+        </tbody>
+      </table>
+    </div>
+<%  }); %>
 
+
+</div>
+
+<script>
+var coll = document.getElementsByClassName("collapsible");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active-record");
+    var content = this.nextElementSibling;
+    if (content.style.display === "block") {
+      content.style.display = "none";
+    } else {
+      content.style.display = "block";
+    }
+    this.firstChild.classList.toggle("fa-chevron-down");
+    this.firstChild.classList.toggle("fa-chevron-up");
+  });
+}
+</script>
 
 <%- include("partials/footer") %>
