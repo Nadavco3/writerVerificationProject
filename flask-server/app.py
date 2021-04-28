@@ -44,8 +44,21 @@ def index():
         # plt.show()
         compareDocs.append(img)
     results = predictByModel(targetDoc,compareDocs)
-    
+
     return results
+
+
+@app.route('/upload', methods=['POST'])
+def index2():
+    uploads_dir = os.path.join(app.instance_path, 'models')
+    if(not os.path.isdir(uploads_dir)):
+        os.makedirs(uploads_dir)
+    print(uploads_dir)
+    a = request.files.getlist('images')
+    results = request.files['targetDoc']
+    results.save(os.path.join( uploads_dir , results.filename))
+
+    return "succses"
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)

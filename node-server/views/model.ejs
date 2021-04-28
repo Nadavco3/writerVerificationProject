@@ -1,5 +1,15 @@
 <%- include("partials/header") %>
 
 <h1>Model</h1>
-
+<div class="upload-box">
+    <h3>Upload new model</h3>
+    <div class="input-group mb-3" >
+        <form action="upload-model" method="post" enctype="multipart/form-data">
+        <div class="upload">
+          <input  type="file" name="fileToUpload" class="form-control" id="inputGroupFile02">
+          <button  type=submit class="input-group-text" for="inputGroupFile02">Upload</button>
+        </div>
+      </form>
+    </div>
+  </div>
 <%- include("partials/footer") %>

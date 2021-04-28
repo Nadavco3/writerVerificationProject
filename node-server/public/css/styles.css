@@ -1,5 +1,9 @@
+html,body{
+  height: 100%;
+}
+
 .footer {
-	position: sticky;
+	position: absolute;
 	text-align: center;
 	bottom: 0;
 	width: 100%;
@@ -9,9 +13,8 @@
 }
 
 .footer p {
-	margin-top: 25px;
 	font-size: 12px;
-	padding-top: 20px;
+	padding-top: 20px; 
   color: #a6a7a8;
 }
 
@@ -285,6 +288,7 @@ h2 {
   width: 100%;
   min-height: 90%;
 }
+
 
 #formContent {
   -webkit-border-radius: 10px 10px 10px 10px;

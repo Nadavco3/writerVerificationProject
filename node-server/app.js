@@ -11,13 +11,20 @@ const multer = require('multer');
 const Jimp = require("jimp");
 const session = require("express-session");
 const bcrypt = require("bcrypt");
-
+const busboy = require('connect-busboy');
 const app = express();
+const fs_extra = require('fs-extra');  
+
+const uploadPath = path.join(__dirname, 'fu/'); // Register the upload path
+fs_extra.ensureDir(uploadPath); // Make sure that he upload path exits
+
 
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({extended: true}));
 app.use(express.static("public"));
 app.use(bodyParser.json());
+
+app.use(busboy({highWaterMark: 2 * 1024 * 1024,})); 
 
 //for image sending from server to python model server
 const storage = multer.diskStorage({
@@ -272,6 +279,36 @@ app.get('/documents', function(req, res){
           res.send(body); //Display the response on the website
         });
       }
+  });
+});
+
+
+app.route('/upload-model').post((req, res, next) => {
+  console.log("enter")
+  req.pipe(req.busboy); // Pipe it trough busboy
+
+  req.busboy.on('file', (fieldname, file, filename) => {
+      console.log(`Upload of '${filename}' started`);
+
+      // Create a write stream of the new file
+      const fstream = fs.createWriteStream(path.join(uploadPath, filename));
+      // Pipe it trough
+      file.pipe(fstream);
+
+      // On finish of the upload
+      fstream.on('close', () => {
+          console.log(`Upload of '${filename}' finished`);
+          res.redirect('back');
+          options = {
+            targetDoc: fs.createReadStream(__dirname + '/' + 'fu' + '/' + filename),
+          }
+          request.post({url:'http://127.0.0.1:5000/upload', formData: options}, function(error, response, body) {
+            console.error('error:', error); // Print the error
+            console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+            console.log('body:', body); // Print the data received
+            deleteAllFilesInDirectory("fu");
+          });
+      });
   });
 });
 
