@@ -20,13 +20,20 @@
     </div>
   </div>
 </form>
+<div class="result-head">
+  <h3 class="total-records">Total:&emsp;<%=records.length%></h3>
+  <button type="button" class="btn btn-primary export-all" name="button">Export All to CSV</button>
+</div>
 <div class="history-records">
 <%  records.forEach(record => {  %>
     <button type="button" class="collapsible"><i class="fas fa-chevron-down"></i>&emsp;<%=record.date%>&emsp;<%=record.target%></button>
     <div class="content">
       <h5><%=record.date%></h5>
       <h5 id="resultTargetDocumentName" >Target Document Selected: &emsp;<%=record.target%></h5>
-      <button type="button" class="btn btn-primary export" name="button">Export to CSV</button>
+      <form action="/export-to-csv" method="post">
+        <button type="submit" class="btn btn-primary export" value="<%=JSON.stringify(record)%>" name="button">Export to CSV</button>
+      </form>
+
       <table class="table">
         <thead>
           <tr>

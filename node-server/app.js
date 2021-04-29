@@ -11,8 +11,7 @@ const multer = require('multer');
 const Jimp = require("jimp");
 const session = require("express-session");
 const bcrypt = require("bcrypt");
-const createCsvWriter = require('csv-writer').createObjectCsvWriter;
-const ObjectsToCsv = require('objects-to-csv');
+const { format } = require('@fast-csv/format');
 const app = express();
 
 app.set('view engine', 'ejs');
@@ -34,14 +33,6 @@ const upload = multer({ storage: storage });
 
 const saltRounds = 10;
 
-const csvWriter = createCsvWriter({
-  path: 'records.csv',
-  header: [
-    {id: 'date', title: 'Date'},
-    {id: 'target', title: 'Target Document Name'},
-    {id: 'compare', title: 'Compared Documents'}
-  ]
-});
 
 app.use(session({
   secret: 'keyboard cat',
@@ -284,27 +275,21 @@ app.get('/history', async function(req,res){
         res.status(500).send('An error occurred', err);
     }
     else {
-      var newRecords = [
-          {
-            date: "27-04-2021",
-            target: "Document1",
-            compareDocumentName: [
-              "Document2", "Document3"
-            ],
-            compatibility: [
-              "100", "56"
-            ],
-            assesment: [
-              "Same Writer", "Not Same Writer"
-            ]
-          }
-      ]
-      const csv = new ObjectsToCsv(newRecords);
-      await csv.toDisk('./test.csv');
-      // csvWriter.writeRecords(recordsFound).then(()=> console.log('The CSV file was written successfully'));
       res.render("history",{docs: userDocs, records: recordsFound});
     }
   });
+});
+
+app.post('/export-to-csv', function(req,res){
+  var writeStream = fs.createWriteStream(req.session.User + ".csv");
+  const csvStream = format({ headers: true });
+  csvStream.pipe(writeStream).on('finish', () => {
+    res.setHeader('Content-disposition', 'attachment; filename=' + req.session.User + '.csv');
+    res.set('Content-Type', 'text/csv');
+    // res.sendFile(__dirname + '/' + req.session.User + '.csv');
+    res.download(__dirname + '/' + req.session.User + '.csv');
+  });
+  createCSVfile(req.body.button, csvStream);
 });
 
 app.post('/search-history', function(req,res){
@@ -346,6 +331,47 @@ app.get('/documents', function(req, res){
       }
   });
 });
+
+function createCSVfile(data,csvStream){
+  data = JSON.parse(data);
+
+  csvStream.write({
+    date: data.date,
+    target: data.target,
+    comparedDocumentName: '',
+    compatibility: '',
+    assesment: ''
+    });
+    data.compare.forEach(doc => {
+      csvStream.write({
+        comparedDocumentName: doc.name,
+        compatibility: doc.compatibility,
+        assesment: doc.assessment
+      });
+    });
+
+  csvStream.write({});
+  csvStream.end();
+
+  // dataToExport.forEach((record,i) => {
+  //   csvStream.write({
+  //     date: record.date,
+  //     target: record.target,
+  //     comparedDocumentName: '',
+  //     compatibility: '',
+  //     assesment: ''
+  //     });
+  //   record.compare.forEach(doc => {
+  //     csvStream.write({
+  //       comparedDocumentName: doc.name,
+  //       compatibility: doc.compatibility,
+  //       assesment: doc.assessment
+  //     });
+  //   });
+  //   csvStream.write({});
+  // });
+  // csvStream.end();
+}
 
 function saveDocumentFile(user_id ,name, content){
   var dir = "public/userDocs/" + user_id;
