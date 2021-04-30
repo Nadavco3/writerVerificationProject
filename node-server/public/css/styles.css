@@ -269,13 +269,25 @@ input[type="file"]{
   background-color: #f1f1f1;
 }
 
+.result-head {
+	padding-top: 30px;
+}
+
 .history-records {
-	padding-top: 10px;
+	padding-top: 50px;
 }
 
 .export {
 	float: right;
 	margin-top: -50px;
+}
+
+.total-records {
+	float: left;
+}
+
+.export-all{
+	float: right;
 }
 
 /* BASIC */
