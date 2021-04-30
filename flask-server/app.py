@@ -7,6 +7,7 @@ import keras
 from keras.models import Model
 import matplotlib.pyplot as plt
 from preprocessing import *
+from flask import jsonify
 
 
 app = Flask(__name__)
@@ -31,7 +32,7 @@ def predictByModel(target,compare):
     
 
 @app.route('/flask', methods=['POST'])
-def index():
+def verifyWriter():
     targetDoc = request.files['targetDoc'].read()
     targetDoc = np.fromstring(targetDoc, np.uint8)
     targetDoc = cv2.imdecode(targetDoc,cv2.IMREAD_COLOR)
@@ -40,8 +41,6 @@ def index():
         img = file.read()
         img = np.fromstring(img, np.uint8)
         img = cv2.imdecode(img,cv2.IMREAD_COLOR)
-        # plt.imshow(img, cmap='gray')
-        # plt.show()
         compareDocs.append(img)
     results = predictByModel(targetDoc,compareDocs)
 
@@ -49,16 +48,30 @@ def index():
 
 
 @app.route('/upload', methods=['POST'])
-def index2():
-    uploads_dir = os.path.join(app.instance_path, 'models')
+def uploadModel():
+    uploads_dir = os.path.join(app.instance_path,  'models' + '/' + request.form['id'])
     if(not os.path.isdir(uploads_dir)):
         os.makedirs(uploads_dir)
-    print(uploads_dir)
-    a = request.files.getlist('images')
-    results = request.files['targetDoc']
-    results.save(os.path.join( uploads_dir , results.filename))
+    modelFile = request.files['model']
+    modelFile.save(os.path.join( uploads_dir , modelFile.filename))
+    return "Uploaded to flask succesfully"
 
-    return "succses"
+
+@app.route('/get-user-models', methods=['POST'])
+def getModels():
+    usr_uploads_dir = os.path.join(app.instance_path,  'models' + '/' + request.form['id'])
+    if(not os.path.isdir(usr_uploads_dir)):
+        return "Empty"
+    return jsonify(os.listdir(usr_uploads_dir))
+
+@app.route('/delete-model', methods=['POST'])
+def deleteModel():
+    print("aaa")
+    usr_uploads_dir = os.path.join(app.instance_path,  'models' + '/' + request.form['id'])
+    if(not os.path.isdir(usr_uploads_dir)):
+        return "Error"
+    os.remove(usr_uploads_dir + "/"  + request.form['modelName'])
+    return jsonify(os.listdir(usr_uploads_dir))
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)

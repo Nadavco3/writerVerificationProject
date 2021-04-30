@@ -567,3 +567,41 @@ input[type=text]:placeholder,input[type=password]:placeholder,input[type=email]:
 #password{
   -webkit-text-security:disc;
 }
+
+.model{
+  margin-top: 20px;
+  padding: 20px;
+  text-align: center;
+}
+
+.vertical-scrollable> .row {
+  height: 150px;
+  margin: auto auto;
+  margin-top: 30px;
+  width:650px;
+  overflow-y: scroll;
+  border-radius: 0.3rem;
+  
+}
+.col-sm-8 { 
+    color: black; 
+    font-size: 20px; 
+    width: 650px;
+    padding-bottom: 15px; 
+    padding-top: 15px; 
+} 
+  
+.col-sm-8:nth-child(2n+1) { 
+    background:#f8f9fa; 
+}
+.p-model{
+  display: inline-block;
+  width: 400px;
+}
+  
+.col-sm-8:nth-child(2n+2) { 
+    background: #e9f5ff;
+} 
+.upload-model{
+  margin-top: 50px;
+}

@@ -19,8 +19,7 @@ const ObjectsToCsv = require('objects-to-csv');
 const app = express();
 const fs_extra = require('fs-extra');
 
-const uploadPath = path.join(__dirname, 'fu/'); // Register the upload path
-fs_extra.ensureDir(uploadPath); // Make sure that he upload path exits
+
 
 
 app.set('view engine', 'ejs');
@@ -57,7 +56,7 @@ app.use(session({
   secret: 'keyboard cat',
   resave: false,
   saveUninitialized: false,
-  cookie: {maxAge: 600000}
+  cookie: {maxAge: 600000, expires:false}
 }));
 
 
@@ -322,7 +321,16 @@ app.post('/search-history', function(req,res){
 });
 
 app.get('/model', function(req,res){
-  res.render("model");
+  options = {
+    id: req.session.User,
+  }
+  request.post({url:'http://127.0.0.1:5000/get-user-models', formData: options}, function(error, response, body) {
+    console.error('error:', error); // Print the error
+    console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+    console.log('body:', body); // Print the data received
+    res.render("model",{models :JSON.parse(body)});
+  });
+  
 });
 
 app.get('/documents', function(req, res){
@@ -359,12 +367,12 @@ app.get('/documents', function(req, res){
 
 
 app.route('/upload-model').post((req, res, next) => {
-  console.log("enter")
   req.pipe(req.busboy); // Pipe it trough busboy
 
   req.busboy.on('file', (fieldname, file, filename) => {
       console.log(`Upload of '${filename}' started`);
-
+      const uploadPath = path.join(__dirname,'temp-upload-model/'+ req.session.User); // Register the upload path
+      fs_extra.ensureDir(uploadPath); // Make sure that he upload path exits
       // Create a write stream of the new file
       const fstream = fs.createWriteStream(path.join(uploadPath, filename));
       // Pipe it trough
@@ -373,18 +381,35 @@ app.route('/upload-model').post((req, res, next) => {
       // On finish of the upload
       fstream.on('close', () => {
           console.log(`Upload of '${filename}' finished`);
-          res.redirect('back');
+          
           options = {
-            targetDoc: fs.createReadStream(__dirname + '/' + 'fu' + '/' + filename),
+            model: fs.createReadStream(uploadPath + '/' + filename),
+            id: req.session.User
           }
           request.post({url:'http://127.0.0.1:5000/upload', formData: options}, function(error, response, body) {
             console.error('error:', error); // Print the error
             console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
             console.log('body:', body); // Print the data received
-            deleteAllFilesInDirectory("fu");
+            res.redirect('/model');
+            deleteFileAndDirectory('temp-upload-model/'+req.session.User);
           });
       });
   });
+});
+
+
+app.post('/delete-model', function(req,res){
+  options = {
+    id: req.session.User,
+    modelName: req.body.modelname
+  }
+  request.post({url:'http://127.0.0.1:5000/delete-model', formData: options}, function(error, response, body) {
+    console.error('error:', error); // Print the error
+    console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+    console.log('body:', body); // Print the data received
+    res.redirect("/model");
+  });
+  
 });
 
 function saveDocumentFile(user_id ,name, content){
@@ -412,11 +437,27 @@ function deleteAllFilesInDirectory(dirName){
   fs.readdir(__dirname + '/' + dirName, (err, files) => {
          if (err) console.log(err);
          for (const file of files) {
-             fs.unlink(__dirname + '/' + dirName + '/' + file, err => {
+              fs.unlink(__dirname + '/' + dirName + '/' + file, err => {
                  if (err) console.log(err);
              });
          }
      });
+}
+function deleteFileAndDirectory(dirName){
+  fs.readdir(__dirname + '/' + dirName, (err, files) => {
+    if (err) console.log(err);
+    for (const file of files) {
+         fs.promises.unlink(__dirname + '/' + dirName + '/' + file, err => {
+            if (err) console.log(err);
+        }).then(()=>{
+          fs.rmdir(__dirname + '/' + dirName, (err) => {
+            if(err){console.log(err);return;}
+            console.log("Folder Deleted!");
+          });
+        });
+    }
+  
+});
 }
 
 app.listen(3000, function() {
