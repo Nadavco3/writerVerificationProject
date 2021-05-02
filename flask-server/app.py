@@ -12,9 +12,9 @@ from flask import jsonify
 
 app = Flask(__name__)
 
-model = keras.models.load_model('modelGoodResults2.h5')
 
-def predictByModel(target,compare):
+
+def predictByModel(target,compare,model):
     target = convert_document_to_patches(target)
     preparePatchesToModel(target)
     print('target ',np.array(target).shape)
@@ -33,6 +33,8 @@ def predictByModel(target,compare):
 
 @app.route('/flask', methods=['POST'])
 def verifyWriter():
+    modelName = request.form['model']
+    userID = request.form['id']
     targetDoc = request.files['targetDoc'].read()
     targetDoc = np.fromstring(targetDoc, np.uint8)
     targetDoc = cv2.imdecode(targetDoc,cv2.IMREAD_COLOR)
@@ -42,7 +44,11 @@ def verifyWriter():
         img = np.fromstring(img, np.uint8)
         img = cv2.imdecode(img,cv2.IMREAD_COLOR)
         compareDocs.append(img)
-    results = predictByModel(targetDoc,compareDocs)
+    if(modelName == 'Defualt-model'):
+        model = keras.models.load_model('modelGoodResults2.h5')
+    else:
+        model = keras.models.load_model(os.path.join(app.instance_path,  'models' + '/' + userID + '/' + modelName ))
+    results = predictByModel(targetDoc,compareDocs,model)
 
     return results
 
@@ -66,7 +72,6 @@ def getModels():
 
 @app.route('/delete-model', methods=['POST'])
 def deleteModel():
-    print("aaa")
     usr_uploads_dir = os.path.join(app.instance_path,  'models' + '/' + request.form['id'])
     if(not os.path.isdir(usr_uploads_dir)):
         return "Error"

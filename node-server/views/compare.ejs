@@ -7,6 +7,7 @@
     var targetDoc = {name: document.getElementById("targetImg").name, id: document.getElementById("targetImg").dataset.id};
     var compareDocs = [];
     var chosenDocs = document.getElementsByClassName("chose-img");
+    const selectedModel = document.getElementsByName("selectedModel")[0].value;
     for(var i=0; i<chosenDocs.length; i++){
       compareDocs.push({name: chosenDocs[i].name, id: chosenDocs[i].dataset.id});
     }
@@ -25,8 +26,10 @@
     }
     xhr.setRequestHeader('Content-Type', "application/json;charset=UTF-8");
     xhr.send(JSON.stringify({
+      
       target: targetDoc,
-      compare: compareDocs
+      compare: compareDocs,
+      model: selectedModel
     }));
   }
 
@@ -37,6 +40,9 @@
     document.getElementById("resultTargetDocumentName").innerHTML = "Target Document Selected: " + "&emsp;" + "<b>"+target.name+"</b>";
 
     var table = document.getElementById("table-body");
+    while (table.firstChild) {
+      table.removeChild(table.lastChild);
+    }
     var row,head,precent,doc_name,doc_precent,model_asses;
     result = JSON.parse(result);
     console.log(result);
@@ -75,7 +81,7 @@
     var doc = document.getElementById("targetDoc");
     var targetImg = document.getElementById("targetImg");
     targetImg.src = doc.options[doc.selectedIndex].value;
-    // targetImg.src = "/userDocs/" + imgName;
+ 
     targetImg.name = doc.options[doc.selectedIndex].dataset.name;
     targetImg.dataset.id = doc.options[doc.selectedIndex].dataset.id;
     document.getElementById("zero-message-target").style.display = "none";
@@ -94,7 +100,7 @@
     }
     var img = document.createElement("img");
     img.classList.add("chose-img");
-    // img.src = "/userDocs/" + imgName;
+ 
     img.src = doc.options[doc.selectedIndex].value;
     img.name = doc.options[doc.selectedIndex].dataset.name;
     img.dataset.id = doc.options[doc.selectedIndex].dataset.id;
@@ -130,7 +136,8 @@
     var counter = document.getElementById("count").innerHTML = "Total: " + String(count);
   }
 
-  function openDocumentInNewWindow(){
+  function openDocumentInNewWindow(e){
+    console.log(e);
     var docID = this.id;
     var allDocs = document.getElementsByClassName("chose-img");
     var documentToView;
@@ -216,16 +223,6 @@
       </div>
       <div id="carouselExampleDark" class="carousel carousel-dark slide carousel-compare">
         <div id="items" class="carousel-inner">
-              <!-- <div class="carousel-item active" >
-              <img class="chose-img" src="Document2.png" name="Document2.png" width=300 height=400 alt="...">
-              <div class="carousel-caption d-none d-md-block manage-buttons">
-                <h5>Document2.png</h5>
-                <div>
-                  <button type="button" class="btn btn-primary document-button" name="button">View</button>
-                  <button type="button" class="btn btn-danger document-button" name="button">Remove</button>
-                </div>
-              </div>
-            </div> -->
         </div>
         <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="prev">
           <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -239,7 +236,18 @@
       </div>
     </div>
     <div class="horizontalLine">
-      <button class="btn btn-success" type="button" onclick="getDocuments()" name="button" >Compare</button>
+      <div class="row">
+        <div class="col-sm-3">
+          <select name="selectedModel" class="form-control" onfocus='this.size=2;' onblur='this.size=1;' onchange='this.size=1; this.blur();'>
+            <% models.forEach(model=>{%>
+              <option value=<%=model%>> <%=model%> </option>
+            <% }) %> 
+          </select>
+        </div>
+        <div class="col-sm-9">
+          <button class="btn btn-success btn-cmpr" type="button" onclick="getDocuments()" name="button" >Compare</button>   
+        </div>
+      </div>
     </div>
 </div>
     <div class="results-box">
@@ -255,26 +263,9 @@
           </tr>
         </thead>
         <tbody id="table-body">
-          <!-- <tr class="table-danger">
-            <th scope="row">1</th>
-            <td>Document1</td>
-            <td>47%</td>
-            <td>Not Same Writer</td>
-          </tr>
-          <tr class="table-success">
-            <th scope="row">2</th>
-            <td>Document2</td>
-            <td>93%</td>
-            <td>Same Writer</td>
-          </tr>
-          <tr class="table-warning">
-            <th scope="row">3</th>
-            <td>Document3</td>
-            <td>76%</td>
-            <td>Same Writer</td>
-          </tr> -->
         </tbody>
       </table>
     </div>
-
+    <script type="text/javascript" src="Scripts/jquery-2.1.1.min.js"></script>
+    
 <%- include("partials/footer") %>
