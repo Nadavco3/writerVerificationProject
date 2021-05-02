@@ -109,7 +109,7 @@ app.get('/my-documents', function(req,res){
             res.status(500).send('An error occurred', err);
         }
         else {
-            res.render('myDocuments', { items: items });
+            res.render('myDocuments', { items: items,name:req.session.name });
         }
     });
 });
@@ -131,7 +131,7 @@ app.get('/compare', function(req,res){
           modelsNames = JSON.parse(body)
           modelsNames.push("Defualt-model");
           modelsNames.reverse()
-          res.render('compare', { docs: items ,models : modelsNames});
+          res.render('compare', { docs: items ,models : modelsNames,name:req.session.name});
         });
       }
   });
@@ -145,7 +145,7 @@ app.get('/history', async function(req,res){
         res.status(500).send('An error occurred', err);
     }
     else {
-      res.render("history",{docs: userDocs, records: recordsFound});
+      res.render("history",{docs: userDocs, records: recordsFound,name:req.session.name});
     }
   });
 });
@@ -158,7 +158,7 @@ app.get('/model', function(req,res){
     console.error('error:', error); // Print the error
     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
     console.log('body:', body); // Print the data received
-    res.render("model",{models :JSON.parse(body)});
+    res.render("model",{models :JSON.parse(body),name:req.session.name});
   });
 
 });
@@ -195,6 +195,12 @@ app.get('/documents', function(req, res){
   });
 });
 
+
+app.get('/LogOut', async function(req,res){
+    req.session.destroy();
+    res.redirect('/'); 
+});
+
 app.post('/confirm-login' ,function(req,res){
   var email = req.body.email;
   var password = req.body.password;
@@ -207,6 +213,7 @@ app.post('/confirm-login' ,function(req,res){
         bcrypt.compare(password, user.password, function(err, result) {
           if(result === true){
             req.session.User = user._id;
+            req.session.name = user.firstname + " " + user.lastname;
             res.redirect("/my-documents");
           } else {
             res.redirect("/login");
