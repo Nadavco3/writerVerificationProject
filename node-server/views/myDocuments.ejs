@@ -20,12 +20,12 @@
         <% } else { %>
           <div class="carousel-item" >
         <% } %>
-          <img class=doc-image src="data:image/<%=items[i].img.contentType%>;base64,<%=items[i].img.data.toString('base64')%>" width=300 height=400 alt="...">
+          <img id="<%=items[i]._id%>" class=doc-image src="data:image/<%=items[i].img.contentType%>;base64,<%=items[i].img.data.toString('base64')%>" width=300 height=400 alt="...">
           <div class="carousel-caption d-none d-md-block">
             <h5><%= items[i].name %></h5>
             <div>
-              <button type="button" class="btn btn-primary document-button" name="button">View</button>
-              <button type="button" class="btn btn-danger document-button" name="button">Delete</button>
+              <button type="button" id="<%=items[i]._id%>" class="btn btn-primary document-button view" name="button">View&emsp;<i class="fas fa-expand"></i></button>
+              <button type="button" id="<%=items[i]._id%>" class="btn btn-danger document-button delete" name="button">Delete&emsp;<i class="fas fa-trash-alt"></i></button>
             </div>
           </div>
         </div>
@@ -56,5 +56,26 @@
     </form>
   </div>
 </div>
+
+<script type="text/javascript">
+  var viewButtons = document.getElementsByClassName("view");
+  for(var i=0; i<viewButtons.length; i++){
+    viewButtons[i].addEventListener("click", function() {
+      var docID = this.id;
+      var allDocs = document.getElementsByClassName("doc-image");
+      var documentToView;
+      for(var i=0; i<allDocs.length; i++){
+        if (allDocs[i].id == docID){
+            documentToView = allDocs[i];
+        }
+      }
+      if(documentToView){
+        // var docWindow = window.open("/userDocs/" + documentToView.name, "Document", "width=500,height=700");
+        var docWindow = window.open("", "Document", "width=500,height=700");
+        docWindow.document.write("<img width=500 height=700 src="+documentToView.src+">");
+      }
+    });
+  }
+</script>
 
 <%- include("partials/footer") %>

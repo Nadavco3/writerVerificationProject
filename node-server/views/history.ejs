@@ -9,29 +9,32 @@
     </div>
     <div class="documentChoose">
       <select class="form-select" id="documentName" name="document" value="">
-        <option value="">All Documents</option>
+        <option value="all">All Documents</option>
         <%  docs.forEach(doc => { %>
             <option value="<%=doc.name%>" ><%= doc.name %></option>
         <% }); %>
       </select>
     </div>
     <div class="searchButton">
-      <button class="btn btn-primary" type="submit" name="button">Show</button>
+      <button class="btn btn-primary" type="submit" name="button">Search&ensp;<i class="fas fa-search"></i></button>
     </div>
   </div>
 </form>
 <div class="result-head">
   <h3 class="total-records">Total:&emsp;<%=records.length%></h3>
-  <button type="button" class="btn btn-primary export-all" name="button">Export All to CSV</button>
+  <form action="/export-to-csv" method="post">
+      <button type="submit" class="btn btn-success export-all" value="<%=JSON.stringify(records)%>" name="button">Export All to CSV</button>
+  </form>
+
 </div>
 <div class="history-records">
-<%  records.forEach(record => {  %>
+<%  records.forEach((record,i) => {  %>
     <button type="button" class="collapsible"><i class="fas fa-chevron-down"></i>&emsp;<%=record.date%>&emsp;<%=record.target%></button>
-    <div class="content">
+    <div class="content" id=<%=i%>>
       <h5><%=record.date%></h5>
       <h5 id="resultTargetDocumentName" >Target Document Selected: &emsp;<%=record.target%></h5>
       <form action="/export-to-csv" method="post">
-        <button type="submit" class="btn btn-primary export" value="<%=JSON.stringify(record)%>" name="button">Export to CSV</button>
+        <button type="submit" class="btn btn-success export" value="<%=JSON.stringify(record)%>" name="button">Export to CSV</button>
       </form>
 
       <table class="table">
@@ -62,23 +65,29 @@
       </table>
     </div>
 <%  }); %>
-
+  <div id="slide" style="display:none">
+    <h1>Hello</h1>
+  </div>
 
 </div>
 
 <script>
 var coll = document.getElementsByClassName("collapsible");
+
 var i;
 
 for (i = 0; i < coll.length; i++) {
   coll[i].addEventListener("click", function() {
     this.classList.toggle("active-record");
-    var content = this.nextElementSibling;
-    if (content.style.display === "block") {
-      content.style.display = "none";
-    } else {
-      content.style.display = "block";
-    }
+    // var content = this.nextElementSibling;
+    var content = $(this).next();
+    content.slideToggle("slow");
+    // if (content.style.display === "block") {
+    //   content.style.display = "none";
+    //
+    // } else {
+    //   // content.style.display = "block";
+    // }
     this.firstChild.classList.toggle("fa-chevron-down");
     this.firstChild.classList.toggle("fa-chevron-up");
   });

@@ -114,8 +114,8 @@ html,body{
 .document-button {
   margin-left: 20px;
   margin-right: 20px;
-  padding-left: 30px;
-  padding-right: 30px;
+  padding-left: 15px;
+  padding-right: 15px;
 }
 
 .navbar {
@@ -248,26 +248,27 @@ input[type="file"]{
 }
 
 .collapsible {
-  background-color: #777;
+  background-color: #48466d;
   color: white;
   cursor: pointer;
   padding: 18px;
   width: 100%;
-  border: none;
+	border: none;
+  border-bottom: 2px solid white;
   text-align: left;
   outline: none;
   font-size: 18px;
 }
 
 .active-record, .collapsible:hover {
-  background-color: #555;
+  background-color: #3d84a8;
 }
 
 .content {
   padding: 18px 18px;
   display: none;
   overflow: hidden;
-  background-color: #f1f1f1;
+  background-color: #f9f7f7;
 }
 
 .result-head {

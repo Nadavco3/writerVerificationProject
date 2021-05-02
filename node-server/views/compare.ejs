@@ -110,12 +110,12 @@
     infoDiv.appendChild(docTitle);
     var buttonsDiv = document.createElement("div");
     var buttonView = document.createElement("button");
-    buttonView.innerHTML = "View";
+    buttonView.innerHTML = "View&emsp;" + '<i class="fas fa-expand"></i>';
     buttonView.classList.add("btn", "btn-primary" ,"document-button");
     buttonView.onclick = openDocumentInNewWindow;
     buttonView.id = count;
     var buttonRemove = document.createElement("button");
-    buttonRemove.innerHTML = "Remove";
+    buttonRemove.innerHTML = "Remove&emsp;" + '<i class="fas fa-trash-alt"></i>';
     buttonRemove.classList.add("btn", "btn-danger" ,"document-button");
     buttonRemove.id = count;
     buttonRemove.onclick = removeSelectedDocument;

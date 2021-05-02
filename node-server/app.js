@@ -268,7 +268,7 @@ app.post('/send-to-model', async function(req,res){
 });
 
 app.get('/history', async function(req,res){
-  userDocs = await imgModel.find({userID: req.session.User}).exec();
+  userDocs = await imgModel.find({userID: req.session.User}, '_id name').exec();
   History.find({userID: req.session.User}, async function(err, recordsFound){
     if (err) {
         console.log(err);
@@ -292,8 +292,27 @@ app.post('/export-to-csv', function(req,res){
   createCSVfile(req.body.button, csvStream);
 });
 
-app.post('/search-history', function(req,res){
+app.post('/search-history', async function(req,res){
   console.log(req.body);
+  userDocs = await imgModel.find({userID: req.session.User}, '_id name').exec();
+  var query = {
+    userID: req.session.User,
+  }
+  if(req.body.document != 'all'){
+    query.target = req.body.document;
+  }
+  if(req.body.date != ''){
+    query.date = req.body.date;
+  }
+  History.find(query, function(err,recordsFound){
+    if(err){
+      console.log(err);
+      res.status(500).send('An error occurred', err);
+    }
+    else {
+      res.render("history",{docs: userDocs, records: recordsFound});
+    }
+  });
 });
 
 app.get('/model', function(req,res){
@@ -334,43 +353,31 @@ app.get('/documents', function(req, res){
 
 function createCSVfile(data,csvStream){
   data = JSON.parse(data);
+  var dataToExport = [];
+  if(Array.isArray(data)){
+    dataToExport = data;
+  } else {
+    dataToExport.push(data);
+  }
 
-  csvStream.write({
-    date: data.date,
-    target: data.target,
-    comparedDocumentName: '',
-    compatibility: '',
-    assesment: ''
-    });
-    data.compare.forEach(doc => {
+  dataToExport.forEach((record,i) => {
+    csvStream.write({
+      date: record.date,
+      target: record.target,
+      comparedDocumentName: '',
+      compatibility: '',
+      assesment: ''
+      });
+    record.compare.forEach(doc => {
       csvStream.write({
         comparedDocumentName: doc.name,
         compatibility: doc.compatibility,
         assesment: doc.assessment
       });
     });
-
-  csvStream.write({});
+    csvStream.write({});
+  });
   csvStream.end();
-
-  // dataToExport.forEach((record,i) => {
-  //   csvStream.write({
-  //     date: record.date,
-  //     target: record.target,
-  //     comparedDocumentName: '',
-  //     compatibility: '',
-  //     assesment: ''
-  //     });
-  //   record.compare.forEach(doc => {
-  //     csvStream.write({
-  //       comparedDocumentName: doc.name,
-  //       compatibility: doc.compatibility,
-  //       assesment: doc.assessment
-  //     });
-  //   });
-  //   csvStream.write({});
-  // });
-  // csvStream.end();
 }
 
 function saveDocumentFile(user_id ,name, content){
