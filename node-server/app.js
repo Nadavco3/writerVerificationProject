@@ -30,7 +30,7 @@ app.use(session({secret: 'keyboard cat',resave: false,saveUninitialized: false,c
 app.use(function (req, res, next) {
   if( whiteList(req.path) || typeof req.session.User !== 'undefined'){
       next();
-  } 
+  }
   else {
       //Return a response immediately
       res.render('login');
@@ -198,7 +198,7 @@ app.get('/documents', function(req, res){
 
 app.get('/LogOut', async function(req,res){
     req.session.destroy();
-    res.redirect('/'); 
+    res.redirect('/');
 });
 
 app.post('/confirm-login' ,function(req,res){
@@ -255,17 +255,33 @@ app.post('/upload',upload.single('image'),(req, res, next) => {
 });
 
 app.post('/add-new-user',function(req,res){
-  bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
-    var newUser = new User({
-      firstname: req.body.firstname,
-      lastname: req.body.lastname,
-      email: req.body.email,
-      password: hash
-    });
-    newUser.save();
-    req.session.User = newUser._id;
-    res.redirect("/my-documents");
+  User.findOne({email: req.body.email},function(err,usr){
+    if(usr){
+      console.log("Error EMAIL");
+      res.redirect("/signUp");
+    }
+    else if(!(/^[a-zA-Z]+$/.test(req.body.firstname)) ||(/^[a-zA-Z]+$/.test(req.body.lastname)))
+    {
+      console.log("NO LETTERS");
+      res.redirect("/signUp");
+    }
+
+    else{
+      bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+        var newUser = new User({
+          firstname: req.body.firstname,
+          lastname: req.body.lastname,
+          email: req.body.email,
+          password: hash
+        });
+        newUser.save();
+        req.session.User = newUser._id;
+        req.session.name = newUser.firstname +" "+newUser.lastname;
+        res.redirect("/my-documents");
+      });
+    }
   });
+
 });
 
 
@@ -341,7 +357,7 @@ app.route('/upload-model').post((req, res, next) => {
           console.log("Error Type model");
           res.redirect('/model');
           return;
-          
+
       }
       console.log(`Upload of '${filename}' started`);
       const uploadPath = path.join(__dirname,'temp-upload-model/'+ req.session.User); // Register the upload path
