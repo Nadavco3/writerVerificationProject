@@ -11,13 +11,32 @@ const multer = require('multer');
 const Jimp = require("jimp");
 const session = require("express-session");
 const bcrypt = require("bcrypt");
+const busboy = require('connect-busboy');
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+const ObjectsToCsv = require('objects-to-csv');
 const { format } = require('@fast-csv/format');
 const app = express();
+const fs_extra = require('fs-extra');
+
+
+
 
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({extended: true}));
 app.use(express.static("public"));
 app.use(bodyParser.json());
+app.use(busboy({highWaterMark: 2 * 1024 * 1024,}));
+app.use(session({secret: 'keyboard cat',resave: false,saveUninitialized: false,cookie: {maxAge: 600000}}));//, expires:false}
+app.use(function (req, res, next) {
+  if( whiteList(req.path) || typeof req.session.User !== 'undefined'){
+      next();
+  }
+  else {
+      //Return a response immediately
+      res.render('login');
+  }
+});
+
 
 //for image sending from server to python model server
 const storage = multer.diskStorage({
@@ -30,16 +49,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-
 const saltRounds = 10;
-
-
-app.use(session({
-  secret: 'keyboard cat',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {maxAge: 600000}
-}));
 
 
 //mongo db connection
@@ -88,81 +98,107 @@ const historySchema = new mongoose.Schema({
 
 const History = new mongoose.model('History', historySchema);
 
-app.get('/', (req, res) => {
-    res.render('login');
-});
-
-app.post('/upload',upload.single('image'),(req, res, next) => {
-  // console.log(req.body);
-  // var fullPath = req.body.image.value;
-  // if (fullPath) {
-  //     var startIndex = (fullPath.indexOf('\\') >= 0 ? fullPath.lastIndexOf('\\') : fullPath.lastIndexOf('/'));
-  //     var filename = fullPath.substring(startIndex);
-  //     if (filename.indexOf('\\') === 0 || filename.indexOf('/') === 0) {
-  //         filename = filename.substring(1);
-  //     }
-  //     console.log(filename);
-  // }
-    var obj = {
-        name: req.file.filename,
-        userID: req.session.User,
-        img: {
-            data: fs.readFileSync(path.join(__dirname + '/uploads/' + req.file.filename)),
-            contentType: 'image/png'
-        }
-    }
-    Jimp.read(__dirname + '/uploads/' + req.file.filename, function (err, file) {
-      if (err) {
-        console.log(err)
-      } else {
-        file.write(__dirname + '/uploads/' + req.file.filename + ".png" , function(){
-          obj.img.data = fs.readFileSync(path.join(__dirname + '/uploads/' + req.file.filename + ".png"));
-          imgModel.create(obj, (err, item) => {
-              if (err) {
-                  console.log(err);
-              }
-              else {
-                  item.save();
-                  deleteAllFilesInDirectory("uploads");
-                  res.redirect('/my-documents');
-              }
-          });
-         });
-       }
-     });
-});
+app.get('/', (req, res) => {req.session.User==='undefined'?res.render('login'):res.redirect('/my-documents')});
+app.get('/login', function(req,res){req.session.User==='undefined'?res.render('login'):res.redirect('/my-documents')});
+app.get('/signUp', function(req,res){res.render("signUp");});
 
 app.get('/my-documents', function(req,res){
-  if(typeof req.session.User === 'undefined'){
-        res.render("login");
-  } else {
-    console.log(req.session.User);
     imgModel.find({}, (err, items) => {
         if (err) {
             console.log(err);
             res.status(500).send('An error occurred', err);
         }
         else {
-          items.forEach(function(item){
-            // filepath  = "public/userDocs/" + item.name + ".png"
-            // fileContent = item.img.data.toString('base64');
-            // try{
-            //   fs.writeFileSync(filepath, new Buffer(fileContent, "base64"));
-            //   var file = new Buffer(fileContent, "base64");
-            // } catch (e){
-            //   console.log("Cannot write file ", e);
-            //   return;
-            // }
-            // console.log("file succesfully saved.");
-          });
-            res.render('myDocuments', { items: items });
+            res.render('myDocuments', { items: items,name:req.session.name });
         }
     });
-  }
 });
 
-app.get('/login', function(req,res){
-  res.render("login");
+app.get('/compare', function(req,res){
+  imgModel.find({userID: req.session.User}, (err, items) => {
+      if (err) {
+          console.log(err);
+          res.status(500).send('An error occurred', err);
+      }
+      else {
+        options = {
+          id: req.session.User,
+        }
+        request.post({url:'http://127.0.0.1:5000/get-user-models', formData: options}, function(error, response, body) {
+          console.error('error:', error); // Print the error
+          console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+          console.log('body:',body); // Print the data received
+          modelsNames = JSON.parse(body)
+          modelsNames.push("Defualt-model");
+          modelsNames.reverse()
+          res.render('compare', { docs: items ,models : modelsNames,name:req.session.name});
+        });
+      }
+  });
+});
+
+app.get('/history', async function(req,res){
+  userDocs = await imgModel.find({userID: req.session.User}).exec();
+  History.find({userID: req.session.User}, async function(err, recordsFound){
+    if (err) {
+        console.log(err);
+        res.status(500).send('An error occurred', err);
+    }
+    else {
+      res.render("history",{docs: userDocs, records: recordsFound,name:req.session.name});
+    }
+  });
+});
+
+app.get('/model', function(req,res){
+  options = {
+    id: req.session.User,
+  }
+  request.post({url:'http://127.0.0.1:5000/get-user-models', formData: options}, function(error, response, body) {
+    console.error('error:', error); // Print the error
+    console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+    console.log('body:', body); // Print the data received
+    res.render("model",{models :JSON.parse(body),name:req.session.name});
+  });
+
+});
+
+app.get('/documents', function(req, res){
+  imgModel.find({name: "Document2"}, (err, item) => {
+      if (err) {
+          console.log(err);
+          res.status(500).send('An error occurred', err);
+      }
+      else {
+        filepath  = "sendApi/" + item[0].name + ".png"
+        fileContent = item[0].img.data.toString('base64');
+        try{
+          fs.writeFileSync(filepath, new Buffer(fileContent, "base64"));
+          var file = new Buffer(fileContent, "base64");
+        } catch (e){
+          console.log("Cannot write file ", e);
+          return;
+        }
+        console.log("file succesfully saved.");
+        options = {
+          targetDoc: bufferToStream(__dirname + '/' + filepath),
+          compareDocs: fs.createReadStream(__dirname + '/BRN3C2AF4AEB56C_0000000015.tif')
+        }
+        request.post({url:'http://127.0.0.1:5000/flask', formData: options}, function(error, response, body) {
+          console.error('error:', error); // Print the error
+          console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+          console.log('body:', body); // Print the data received
+          deleteAllFilesInDirectory("sendApi");
+          res.send(body); //Display the response on the website
+        });
+      }
+  });
+});
+
+
+app.get('/LogOut', async function(req,res){
+    req.session.destroy();
+    res.redirect('/');
 });
 
 app.post('/confirm-login' ,function(req,res){
@@ -177,6 +213,7 @@ app.post('/confirm-login' ,function(req,res){
         bcrypt.compare(password, user.password, function(err, result) {
           if(result === true){
             req.session.User = user._id;
+            req.session.name = user.firstname + " " + user.lastname;
             res.redirect("/my-documents");
           } else {
             res.redirect("/login");
@@ -187,47 +224,71 @@ app.post('/confirm-login' ,function(req,res){
   });
 });
 
-app.get('/signup', function(req,res){
-  res.render("signUp");
+app.post('/upload',upload.single('image'),(req, res, next) => {
+  var obj = {
+      name: req.file.filename,
+      userID: req.session.User,
+      img: {
+          data: fs.readFileSync(path.join(__dirname + '/uploads/' + req.file.filename)),
+          contentType: 'image/png'
+      }
+  }
+  Jimp.read(__dirname + '/uploads/' + req.file.filename, function (err, file) {
+    if (err) {
+      console.log(err)
+    } else {
+      file.write(__dirname + '/uploads/' + req.file.filename + ".png" , function(){
+        obj.img.data = fs.readFileSync(path.join(__dirname + '/uploads/' + req.file.filename + ".png"));
+        imgModel.create(obj, (err, item) => {
+            if (err) {
+                console.log(err);
+            }
+            else {
+                item.save();
+                deleteAllFilesInDirectory("uploads");
+                res.redirect('/my-documents');
+            }
+        });
+       });
+     }
+   });
 });
 
 app.post('/add-new-user',function(req,res){
-  bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
-    var newUser = new User({
-      firstname: req.body.firstname,
-      lastname: req.body.lastname,
-      email: req.body.email,
-      password: hash
-    });
-    newUser.save();
-    req.session.User = newUser._id;
-    res.redirect("/my-documents");
-  });
+  User.findOne({email: req.body.email},function(err,usr){
+    if(usr){
+      console.log("Error EMAIL");
+      res.redirect("/signUp");
+    }
+    else if(!(/^[a-zA-Z]+$/.test(req.body.firstname)) ||(/^[a-zA-Z]+$/.test(req.body.lastname)))
+    {
+      console.log("NO LETTERS");
+      res.redirect("/signUp");
+    }
 
-});
-
-app.get('/compare', function(req,res){
-  // fs.readdir(__dirname + '/public/userDocs', (err, files) => {
-  //        if (err) console.log(err);
-  //        res.render("compare",{docs: files});
-  //    });
-  imgModel.find({userID: req.session.User}, (err, items) => {
-      if (err) {
-          console.log(err);
-          res.status(500).send('An error occurred', err);
-      }
-      else {
-        items.forEach(function(item){
+    else{
+      bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+        var newUser = new User({
+          firstname: req.body.firstname,
+          lastname: req.body.lastname,
+          email: req.body.email,
+          password: hash
         });
-          res.render('compare', { docs: items });
-      }
+        newUser.save();
+        req.session.User = newUser._id;
+        req.session.name = newUser.firstname +" "+newUser.lastname;
+        res.redirect("/my-documents");
+      });
+    }
   });
+
 });
+
 
 app.post('/send-to-model', async function(req,res){
-  console.log(req.body);
   var docs = JSON.stringify(req.body);
   docs = JSON.parse(docs);
+  const modelName = docs.model;
   var target = await imgModel.findById(docs.target.id).exec();
   saveDocumentFile(req.session.User, target.name, target.img.data);
   var compareDocsArray = [];
@@ -240,7 +301,9 @@ app.post('/send-to-model', async function(req,res){
   };
   options = {
     targetDoc: fs.createReadStream(__dirname + '/public/userDocs/' + req.session.User + '/' + target.name + '.png'),
-    compareDocs: compareDocsArray
+    compareDocs: compareDocsArray,
+    model: modelName,
+    id:req.session.User
   }
   //'http://127.0.0.1:5000/flask'
   request.post({url:'http://127.0.0.1:5000/flask', formData: options}, function(error, response, body) {
@@ -315,41 +378,63 @@ app.post('/search-history', async function(req,res){
   });
 });
 
-app.get('/model', function(req,res){
-  res.render("model");
-});
 
-app.get('/documents', function(req, res){
-  imgModel.find({name: "Document2"}, (err, item) => {
-      if (err) {
-          console.log(err);
-          res.status(500).send('An error occurred', err);
-      }
-      else {
-        filepath  = "sendApi/" + item[0].name + ".png"
-        fileContent = item[0].img.data.toString('base64');
-        try{
-          fs.writeFileSync(filepath, new Buffer(fileContent, "base64"));
-          var file = new Buffer(fileContent, "base64");
-        } catch (e){
-          console.log("Cannot write file ", e);
+app.route('/upload-model').post((req, res, next) => {
+  req.pipe(req.busboy); // Pipe it trough busboy
+
+  req.busboy.on('file', (fieldname, file, filename) => {
+      const fileType = filename.split('.')[1];
+      if( !(fileType === 'h5' || fileType ==='keras')){
+          console.log("Error Type model");
+          res.redirect('/model');
           return;
-        }
-        console.log("file succesfully saved.");
-        options = {
-          targetDoc: bufferToStream(__dirname + '/' + filepath),
-          compareDocs: fs.createReadStream(__dirname + '/BRN3C2AF4AEB56C_0000000015.tif')
-        }
-        request.post({url:'http://127.0.0.1:5000/flask', formData: options}, function(error, response, body) {
-          console.error('error:', error); // Print the error
-          console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-          console.log('body:', body); // Print the data received
-          deleteAllFilesInDirectory("sendApi");
-          res.send(body); //Display the response on the website
-        });
+
       }
+      console.log(`Upload of '${filename}' started`);
+      const uploadPath = path.join(__dirname,'temp-upload-model/'+ req.session.User); // Register the upload path
+      fs_extra.ensureDir(uploadPath); // Make sure that he upload path exits
+      // Create a write stream of the new file
+      const fstream = fs.createWriteStream(path.join(uploadPath, filename));
+      // Pipe it trough
+      file.pipe(fstream);
+
+      // On finish of the upload
+      fstream.on('close', () => {
+          console.log(`Upload of '${filename}' finished`);
+
+          options = {
+            model: fs.createReadStream(uploadPath + '/' + filename),
+            id: req.session.User
+          }
+          request.post({url:'http://127.0.0.1:5000/upload', formData: options}, function(error, response, body) {
+            console.error('error:', error); // Print the error
+            console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+            console.log('body:', body); // Print the data received
+            res.redirect('/model');
+            deleteFileAndDirectory('temp-upload-model/'+req.session.User);
+          });
+      });
   });
 });
+
+app.post('/delete-model', function(req,res){
+  options = {
+    id: req.session.User,
+    modelName: req.body.modelname
+  }
+  request.post({url:'http://127.0.0.1:5000/delete-model', formData: options}, function(error, response, body) {
+    console.error('error:', error); // Print the error
+    console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+    console.log('body:', body); // Print the data received
+    res.redirect("/model");
+  });
+
+});
+
+function whiteList(path){
+  return path === '/add-new-user' || path === '/signUp' || path === '/confirm-login';
+}
+
 
 function createCSVfile(data,csvStream){
   data = JSON.parse(data);
@@ -405,12 +490,29 @@ function deleteAllFilesInDirectory(dirName){
   fs.readdir(__dirname + '/' + dirName, (err, files) => {
          if (err) console.log(err);
          for (const file of files) {
-             fs.unlink(__dirname + '/' + dirName + '/' + file, err => {
+              fs.unlink(__dirname + '/' + dirName + '/' + file, err => {
                  if (err) console.log(err);
              });
          }
      });
 }
+function deleteFileAndDirectory(dirName){
+  fs.readdir(__dirname + '/' + dirName, (err, files) => {
+    if (err) console.log(err);
+    for (const file of files) {
+         fs.promises.unlink(__dirname + '/' + dirName + '/' + file, err => {
+            if (err) console.log(err);
+        }).then(()=>{
+          fs.rmdir(__dirname + '/' + dirName, (err) => {
+            if(err){console.log(err);return;}
+            console.log("Folder Deleted!");
+          });
+        });
+    }
+
+});
+}
+
 
 app.listen(3000, function() {
   console.log("Server started on port 3000");
