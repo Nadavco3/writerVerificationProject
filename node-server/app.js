@@ -254,6 +254,17 @@ app.post('/upload',upload.single('image'),(req, res, next) => {
    });
 });
 
+app.post("/delete-document", function(req,res){
+  imgModel.deleteOne({_id: req.body.documentToDelete},function(err){
+    if(err){
+      console.log(err);
+      res.status(500).send('An error occurred', err);
+    } else {
+      res.redirect("/my-documents");
+    }
+  });
+});
+
 app.post('/add-new-user',function(req,res){
   User.findOne({email: req.body.email},function(err,usr){
     if(usr){

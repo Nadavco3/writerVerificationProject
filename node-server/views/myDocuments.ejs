@@ -24,8 +24,10 @@
           <div class="carousel-caption d-none d-md-block">
             <h5><%= items[i].name %></h5>
             <div>
-              <button type="button" id="<%=items[i]._id%>" class="btn btn-primary document-button view" name="button">View&emsp;<i class="fas fa-expand"></i></button>
-              <button type="button" id="<%=items[i]._id%>" class="btn btn-danger document-button delete" name="button">Delete&emsp;<i class="fas fa-trash-alt"></i></button>
+              <form action="/delete-document" method="post">
+                <button type="button" id="<%=items[i]._id%>" class="btn btn-primary document-button view" name="button">View&emsp;<i class="fas fa-expand"></i></button>
+                <button type="submit" id="<%=items[i]._id%>" class="btn btn-danger document-button delete" value="<%=items[i]._id%>" name="documentToDelete">Delete&emsp;<i class="fas fa-trash-alt"></i></button>
+              </form>
             </div>
           </div>
         </div>
@@ -42,9 +44,8 @@
   </div>
   </div>
   <%}%>
-
-
 </div>
+
 <div class="upload-box">
   <h3>Upload new documents</h3>
   <div class="input-group mb-3" >
@@ -76,6 +77,7 @@
       }
     });
   }
+
 </script>
 
 <%- include("partials/footer") %>

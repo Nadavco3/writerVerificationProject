@@ -26,7 +26,7 @@
     }
     xhr.setRequestHeader('Content-Type', "application/json;charset=UTF-8");
     xhr.send(JSON.stringify({
-      
+
       target: targetDoc,
       compare: compareDocs,
       model: selectedModel
@@ -81,11 +81,15 @@
     var doc = document.getElementById("targetDoc");
     var targetImg = document.getElementById("targetImg");
     targetImg.src = doc.options[doc.selectedIndex].value;
- 
+
     targetImg.name = doc.options[doc.selectedIndex].dataset.name;
     targetImg.dataset.id = doc.options[doc.selectedIndex].dataset.id;
     document.getElementById("zero-message-target").style.display = "none";
     document.getElementById("chosen-doc").style.display = "block";
+  }
+
+  function cropImage(){
+    document.getElementById('crop').style.display = "block";
   }
 
   function addCompareDocument(){
@@ -100,7 +104,7 @@
     }
     var img = document.createElement("img");
     img.classList.add("chose-img");
- 
+
     img.src = doc.options[doc.selectedIndex].value;
     img.name = doc.options[doc.selectedIndex].dataset.name;
     img.dataset.id = doc.options[doc.selectedIndex].dataset.id;
@@ -188,6 +192,11 @@
   <img id="loading-image" src="Loading.gif" alt="Loading..." />
   <h5>Your documents are being process...</h5>
 </div>
+<div id="crop">
+  <!-- <div class="crop-image"> -->
+    <img id="crop-image" src="Document2.png" width=400 height=500 alt="">
+  <!-- </div> -->
+</div>
 <div class="row select-body">
   <div class="col lg-5">
     <h3 id="test" >Choose Target Document</h3>
@@ -214,7 +223,7 @@
             <option data-id="<%=doc._id%>" data-name="<%=doc.name%>" value="data:image/<%=doc.img.contentType%>;base64,<%=doc.img.data.toString('base64')%>" ><%= doc.name %></option>
         <% }); %>
       </select>
-      <button class="btn btn-primary" onClick="addCompareDocument()" type="button" name="button">Add</button>
+      <button class="btn btn-primary" onClick="cropImage()" type="button" name="button">Add</button>
     </div>
     <div class="img-box">
       <h5 id="count">Total: 0</h5>
@@ -241,11 +250,11 @@
           <select name="selectedModel" class="form-control" onfocus='this.size=2;' onblur='this.size=1;' onchange='this.size=1; this.blur();'>
             <% models.forEach(model=>{%>
               <option value=<%=model%>> <%=model%> </option>
-            <% }) %> 
+            <% }) %>
           </select>
         </div>
         <div class="col-sm-9">
-          <button class="btn btn-success btn-cmpr" type="button" onclick="getDocuments()" name="button" >Compare</button>   
+          <button class="btn btn-success btn-cmpr" type="button" onclick="getDocuments()" name="button" >Compare</button>
         </div>
       </div>
     </div>
@@ -267,5 +276,18 @@
       </table>
     </div>
     <script type="text/javascript" src="Scripts/jquery-2.1.1.min.js"></script>
-    
+    <script type="text/javascript">
+      var el = document.getElementById('crop-image');
+      var resize = new Croppie(el, {
+          viewport: { width: 100, height: 100 },
+          boundary: { width: 400, height: 500 },
+          showZoomer: false,
+          enableResize: true,
+          enableOrientation: true,
+          mouseWheelZoom: 'ctrl'
+      });
+      resize.bind({
+          url: 'Document2.png',
+      });
+    </script>
 <%- include("partials/footer") %>
