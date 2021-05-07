@@ -89,6 +89,9 @@
   }
 
   function cropImage(){
+    resize.bind({
+        url: el.src,
+    });
     document.getElementById('crop').style.display = "block";
   }
 
@@ -194,7 +197,7 @@
 </div>
 <div id="crop">
   <!-- <div class="crop-image"> -->
-    <img id="crop-image" src="Document2.png" width=400 height=500 alt="">
+    <img id="crop-image" src="Document2.png" width=600 height=800 alt="">
   <!-- </div> -->
 </div>
 <div class="row select-body">
@@ -279,15 +282,13 @@
     <script type="text/javascript">
       var el = document.getElementById('crop-image');
       var resize = new Croppie(el, {
-          viewport: { width: 100, height: 100 },
-          boundary: { width: 400, height: 500 },
+          viewport: { width: 200, height: 100 },
+          boundary: { width: 350, height: 450 },
           showZoomer: false,
           enableResize: true,
           enableOrientation: true,
           mouseWheelZoom: 'ctrl'
       });
-      resize.bind({
-          url: 'Document2.png',
-      });
+
     </script>
 <%- include("partials/footer") %>
