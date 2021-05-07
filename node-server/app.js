@@ -303,19 +303,23 @@ app.post('/send-to-model', async function(req,res){
   var target = await imgModel.findById(docs.target.id).exec();
   saveDocumentFile(req.session.User, target.name, target.img.data);
   var compareDocsArray = [];
+  var comparePoints = [];
   var compareHistory = [];
   for(var i=0; i<docs.compare.length; i++){
     var compare = await imgModel.findById(docs.compare[i].id).exec();
     compareHistory.push({name: compare.name});
     saveDocumentFile(req.session.User, compare.name, compare.img.data);
     compareDocsArray.push(fs.createReadStream(__dirname + '/public/userDocs/' + req.session.User + '/' + compare.name + '.png'));
+    comparePoints.push(docs.compare[i].points);
   };
   options = {
     targetDoc: fs.createReadStream(__dirname + '/public/userDocs/' + req.session.User + '/' + target.name + '.png'),
     compareDocs: compareDocsArray,
+    comparePoints: comparePoints,
     model: modelName,
     id:req.session.User
   }
+  console.log(comparePoints,typeof(comparePoints[0]));
   //'http://127.0.0.1:5000/flask'
   request.post({url:'http://127.0.0.1:5000/flask', formData: options}, function(error, response, body) {
     console.error('error:', error); // Print the error

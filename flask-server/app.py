@@ -39,11 +39,17 @@ def verifyWriter():
     targetDoc = np.fromstring(targetDoc, np.uint8)
     targetDoc = cv2.imdecode(targetDoc,cv2.IMREAD_COLOR)
     compareDocs = []
+    points = request.form['comparePoints']
+    points = points.split(',')
+    print(points)
     for file in request.files.getlist('compareDocs'):
         img = file.read()
         img = np.fromstring(img, np.uint8)
         img = cv2.imdecode(img,cv2.IMREAD_COLOR)
         compareDocs.append(img)
+        print(int(points[0]))
+        plt.imshow(img[int(points[1]):int(points[3]),int(points[0]):int(points[2])],cmap='gray')
+        plt.show()
     if(modelName == 'Defualt-model'):
         model = keras.models.load_model('modelGoodResults2.h5')
     else:

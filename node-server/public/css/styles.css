@@ -189,13 +189,19 @@ input[type="file"]{
 }
 
 #crop {
-  width: 50%
-  margin auto;
   position: fixed;
   display: none;
   z-index: 99;
   background-color: #fff;
+  left: 40%;
+  top: 10%;
 }
+
+/* .crop-image {
+  width: 50%
+  margin auto;
+  z-index: 100;
+} */
 
 .results-box {
 	display: none;
