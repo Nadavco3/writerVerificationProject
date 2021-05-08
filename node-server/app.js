@@ -347,18 +347,6 @@ app.post('/send-to-model', async function(req,res){
 
 });
 
-app.get('/history', async function(req,res){
-  userDocs = await imgModel.find({userID: req.session.User}, '_id name').exec();
-  History.find({userID: req.session.User}, async function(err, recordsFound){
-    if (err) {
-        console.log(err);
-        res.status(500).send('An error occurred', err);
-    }
-    else {
-      res.render("history",{docs: userDocs, records: recordsFound});
-    }
-  });
-});
 
 app.post('/export-to-csv', function(req,res){
   var writeStream = fs.createWriteStream(req.session.User + ".csv");

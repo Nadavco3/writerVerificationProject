@@ -219,6 +219,8 @@
         cropButton.onclick = async()=>{
           
           var targetImg = document.getElementById("targetImg");
+          targetImg.classList.add("chose-img");
+          targetImg.classList.add("target-img");
           var points = (resize.get()).points;
           var width = parseInt(points[2]) - parseInt(points[0]);
           var height = parseInt(points[3]) - parseInt(points[1]);
@@ -276,10 +278,11 @@
           // img.height = 400;
           itemDiv.appendChild(img);
           var infoDiv = document.createElement("div");
-          infoDiv.classList.add("carousel-caption","d-none","d-md-block","manage-buttons");
+          infoDiv.classList.add("infoDiv");
+          // infoDiv.classList.add("carousel-caption","d-none","d-md-block","manage-buttons");
           docTitle = document.createElement("h5");
           var node = document.createTextNode(img.name);
-          console.log(doc.name);
+          // console.log(doc.name);
           docTitle.appendChild(node);
           infoDiv.appendChild(docTitle);
           var buttonsDiv = document.createElement("div");
@@ -293,9 +296,13 @@
           buttonRemove.classList.add("btn", "btn-danger" ,"document-button");
           buttonRemove.id = count;
           buttonRemove.onclick = removeSelectedDocument;
-          buttonsDiv.appendChild(buttonView);
-          buttonsDiv.appendChild(buttonRemove);
-          infoDiv.appendChild(buttonsDiv);
+          // buttonsDiv.appendChild(buttonView);
+          // buttonsDiv.appendChild(buttonRemove);
+          // infoDiv.appendChild(buttonsDiv);
+          // itemDiv.appendChild(infoDiv);
+          infoDiv.appendChild(docTitle);
+          infoDiv.appendChild(buttonView);
+          infoDiv.appendChild(buttonRemove);
           itemDiv.appendChild(infoDiv);
           var items = document.getElementById("items");
           items.appendChild(itemDiv);
