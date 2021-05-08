@@ -328,6 +328,7 @@ app.post('/send-to-model', async function(req,res){
     console.log('body:', body); // Print the data received
     // res.render("compare",{docs: documents, results: result}); //Display the response on the website
     res.send(body);
+    deleteAllFilesInDirectory( 'public/userDocs/' +req.session.User);
     body = JSON.parse(body);
     for(var i=0; i<compareHistory.length; i++){
       var result = parseFloat(body[i])*100;
