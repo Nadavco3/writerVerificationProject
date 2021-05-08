@@ -42,7 +42,7 @@
       <div id="zero-message" class="zero-docs-compare">
         <p>You hav'nt added any documents</p>
       </div>
-      <div id="carouselExampleDark" class="carousel carousel-dark slide carousel-compare">
+      <div id="carouselExampleDark" class="carousel carousel-dark slide carousel-compare" data-bs-interval="false">
         <div id="items" class="carousel-inner">
         </div>
         <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="prev">
@@ -317,7 +317,7 @@
         var allDocs = document.getElementsByClassName("chose-img");
         var documentToView;
         for(var i=0; i<allDocs.length; i++){
-          if (allDocs[i].id == docID){
+          if (allDocs[i].id === docID){
               documentToView = allDocs[i];
           }
         }
@@ -334,7 +334,7 @@
         var documentToDelete;
         allDocs = document.getElementsByClassName("carousel-item");
         for(var i=0; i<allDocs.length; i++){
-          if (allDocs[i].id == docID){
+          if (allDocs[i].id === docID){
               documentToDelete = allDocs[i];
           }
         }
@@ -344,6 +344,8 @@
             for(var i=0; i<allDocs.length; i++){
               if (allDocs[i] != documentToDelete){
                   allDocs[i].classList.add("active");
+                  break;
+
               }
             }
           }

@@ -336,8 +336,8 @@ def split_into_patches(img,num_of_patches):
         if( (x2-x1)==900  and (y2-y1) == 900 and  checkPatch(temp)):
             patches.append(temp)
             counter+=1
-        x1 += 400
-        x2 += 400
+        x1 += 500
+        x2 += 500
     if counter < num_of_patches:
         split_into_patches_random(img,num_of_patches,counter,patches)
     return patches
@@ -357,8 +357,6 @@ def extractTextbox(img):
     
     img = boundText(img)  
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    plt.imshow(img,cmap='gray')
-    plt.show()
     return img
     
 def convert_document_to_patches(img):
@@ -374,8 +372,9 @@ def preparePatchesToModel(patches):
         np.expand_dims(patches[i], axis=0)
         patches[i] = cv2.resize(patches[i], (150,150))
         patches[i]/=255
-        # plt.imshow(patches[i],cmap="gray")
-        # plt.show()
+        # if(i==0):
+        #     # plt.imshow(patches[i],cmap="gray")
+        #     # plt.show()
        
 
 def saveTextbox():
