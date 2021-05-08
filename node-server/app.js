@@ -314,6 +314,7 @@ app.post('/send-to-model', async function(req,res){
   };
   options = {
     targetDoc: fs.createReadStream(__dirname + '/public/userDocs/' + req.session.User + '/' + target.name + '.png'),
+    targetPoints:docs.target.points,
     compareDocs: compareDocsArray,
     comparePoints: comparePoints,
     model: modelName,

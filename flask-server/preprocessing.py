@@ -279,7 +279,7 @@ def boundText(im):
     return im[y1min:y2max,x1min:x2max]
 
 
-def split_into_patches_random(path,img,img_name,num_of_patches,counter,patches):
+def split_into_patches_random(img,num_of_patches,counter,patches):
     #set borders to the image
     ymax,xmax=img.shape[0],img.shape[1]
     #set the height and width of the patch size
@@ -345,19 +345,20 @@ def split_into_patches(img,num_of_patches):
 
     
 def extractTextbox(img):
-    img = np.resize(img,(h,w,3))
-    img = np.array(img)
-    angle,xmin,xmax,ymax = find_squares2(img)
+    # img = np.resize(img,(h,w,3))remove_yellow
+    # img = np.array(img)
+    # angle,xmin,xmax,ymax = find_squares2(img)
 
-    img = rotate_image(img,angle)
+    # img = rotate_image(img,angle)
     
     img = remove_yellow(img)#cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR))
-    img = np.array(img)
-    img = img[1900:ymax-100,xmin:xmax+100]
+    # img = np.array(img)
+    # img = img[1900:ymax-100,xmin:xmax+100]
     
-    img = boundText(img)
-    
+    img = boundText(img)  
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    plt.imshow(img,cmap='gray')
+    plt.show()
     return img
     
 def convert_document_to_patches(img):
@@ -369,10 +370,13 @@ def convert_document_to_patches(img):
 
 def preparePatchesToModel(patches):
     for i in range(len(patches)):
-        patches[i] = np.resize(patches[i],(150, 150))
-        patches[i] = patches[i].reshape(patches[i].shape[0],patches[i].shape[1],1)
-        patches[i] = np.array(patches[i], dtype = np.float32)
+        patches[i] = np.array(patches[i], dtype = np.float32)    
+        np.expand_dims(patches[i], axis=0)
+        patches[i] = cv2.resize(patches[i], (150,150))
         patches[i]/=255
+        # plt.imshow(patches[i],cmap="gray")
+        # plt.show()
+       
 
 def saveTextbox():
     document_name_list = os.listdir('./HandwrittenForms_paragraphs/')
