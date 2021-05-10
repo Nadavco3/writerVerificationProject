@@ -15,6 +15,11 @@ html,body{
   text-align: center;
 
 }
+
+.infoDivtarget{
+  padding-right: 7%;
+}
+
 .footer p {
 	font-size: 12px;
 	padding-top: 20px;
@@ -26,16 +31,16 @@ html,body{
   width: 50%;
 }
 
-.chose-img {
+.chose-img,#targetImg {
   border: 1px solid black;
 	margin-left: 25%;
   margin-bottom: 10px;
   height: 250px;
   width: 350px;
 }
-
+ 
 .target-img{
-  margin-left: 12%;
+  margin-left: 12% !important;
   margin-top: 4%;
 }
 
@@ -328,7 +333,7 @@ input[type="file"]{
 }
 
 .zero-records{
-  padding-top: 100px
+  padding-top: 100px;
   color: #bfc3c6;
   text-align: center;
   font-size: 18px;
