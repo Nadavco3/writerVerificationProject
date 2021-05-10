@@ -116,9 +116,6 @@
       document.getElementById('crop').style.display = "none";
     }
 
-    async function chooseTargetDocument(){
-
-    }
 
     function cropImage_trg(){
       var el = document.getElementById('crop-image');
@@ -134,6 +131,11 @@
 
 
       cropButton.onclick = async()=>{
+        var olditemsDiv= document.getElementById("itemsDiv")
+        if(olditemsDiv!=undefined){
+          olditemsDiv.remove();
+        }
+
         var targetImg = document.createElement("img");
         var itemsDiv = document.createElement("div");
         var infoDiv = document.createElement("div");
@@ -147,8 +149,10 @@
         var node;
 
         infoDiv.classList.add("infoDiv");
-        targetImg.classList.add("chose-img");
+        infoDiv.classList.add("infoDivtarget")
         targetImg.classList.add("target-img");
+        targetImg.id = "targetImg";
+        itemsDiv.id = "itemsDiv";
         targetImg.src = await resize.result("canvas",{width,height},"png",1,false);
         targetImg.name = doc.options[doc.selectedIndex].dataset.name;
         targetImg.dataset.id = doc.options[doc.selectedIndex].dataset.id;
@@ -162,7 +166,10 @@
 
         buttonView.innerHTML = "View&emsp;" + '<i class="fas fa-expand"></i>';
         buttonView.classList.add("btn", "btn-primary" ,"document-button");
-        buttonView.onclick = openDocumentInNewWindow;
+        buttonView.onclick = ()=>{
+          targetImg = document.getElementById("targetImg");
+          openWindow(targetImg.src);
+        }
         buttonView.id = targetImg.dataset.id;
 
         buttonRemove.innerHTML = "Remove&emsp;" + '<i class="fas fa-trash-alt"></i>';
@@ -272,11 +279,15 @@
         }
       }
       if(documentToView){
-        var docW = documentToView.width * 1.5;
-        var docH = documentToView.height * 1.5;
-        var docWindow = window.open("", "Document", "width=" + docW + ",height=" + docH);
-        docWindow.document.write("<img width=" + docW + " height=" + docH + " src="+documentToView.src+">");
+        openWindow(documentToView);
       }
+    }
+
+    function openWindow(documentToView){
+      var docW = documentToView.width * 1.5;
+      var docH = documentToView.height * 1.5;
+      var docWindow = window.open("", "Document", "width=" + docW + ",height=" + docH);
+      docWindow.document.write("<img width=" + docW + " height=" + docH + " src="+documentToView.src+">");
     }
 
     function removeSelectedDocument(){

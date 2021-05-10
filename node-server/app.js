@@ -26,7 +26,7 @@ app.use(express.urlencoded({extended: true}));
 app.use(express.static("public"));
 app.use(bodyParser.json());
 app.use(busboy({highWaterMark: 2 * 1024 * 1024,}));
-app.use(session({secret: 'keyboard cat',resave: false,saveUninitialized: false,cookie: {maxAge: 600000}}));//, expires:false}
+app.use(session({secret: 'keyboard cat',resave: false,saveUninitialized: false,expires:false}));//, expires:false}
 app.use(function (req, res, next) {
   if( whiteList(req.path) || typeof req.session.User !== 'undefined'){
       next();
@@ -105,7 +105,7 @@ app.get('/login', function(req,res){req.session.User==='undefined'?res.render('l
 app.get('/signUp', function(req,res){res.render("signUp",{msg: ""});});
 
 app.get('/my-documents', function(req,res){
-    imgModel.find({}, (err, items) => {
+    imgModel.find({userID: req.session.User }, (err, items) => {
         if (err) {
             console.log(err);
             res.status(500).send('An error occurred', err);
@@ -163,38 +163,6 @@ app.get('/model', function(req,res){
     res.render("model",{models :JSON.parse(body),name:req.session.name});
   });
 
-});
-
-app.get('/documents', function(req, res){
-  imgModel.find({name: "Document2"}, (err, item) => {
-      if (err) {
-          console.log(err);
-          res.status(500).send('An error occurred', err);
-      }
-      else {
-        filepath  = "sendApi/" + item[0].name + ".png"
-        fileContent = item[0].img.data.toString('base64');
-        try{
-          fs.writeFileSync(filepath, new Buffer(fileContent, "base64"));
-          var file = new Buffer(fileContent, "base64");
-        } catch (e){
-          console.log("Cannot write file ", e);
-          return;
-        }
-        console.log("file succesfully saved.");
-        options = {
-          targetDoc: bufferToStream(__dirname + '/' + filepath),
-          compareDocs: fs.createReadStream(__dirname + '/BRN3C2AF4AEB56C_0000000015.tif')
-        }
-        request.post({url:'http://127.0.0.1:5000/flask', formData: options}, function(error, response, body) {
-          console.error('error:', error); // Print the error
-          console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-          console.log('body:', body); // Print the data received
-          deleteAllFilesInDirectory("sendApi");
-          res.send(body); //Display the response on the website
-        });
-      }
-  });
 });
 
 
