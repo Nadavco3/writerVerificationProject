@@ -1,6 +1,30 @@
 <%- include("partials/header") %>
+<script type="text/javascript">
+  function upload(){
+    document.getElementById("loading").style.display = "block";
+  }
+</script>
 
+<div id="loading">
+  <img id="loading-image" src="Loading.gif" alt="Loading..." />
+  <h4>Uploading Your Document. Please wait...</h4>
+</div>
 
+<div id="info" class="info-window">
+  <button type="button" class="btn-close" onclick="openCloseInfoWindow()" style="float: right;margin-top: 2px; margin-right: 5px;" name="button"></button>
+  <div id="info-content">
+    <h5>Home Page</h5>
+    <p>Here you can upload hand written documents.</p>
+    <p>You can also see all other documents you have uploaded and manage them.</p>
+  </div>
+  <div id="info-warning">
+    <p>Notice: You can upload images files of any type(.png, .jpg, .jpeg, .tiff). we will convert your file to .png after you upload.</p>
+  </div>
+</div>
+
+<div style="float: right;">
+    <i onclick="openCloseInfoWindow()" style="cursor: pointer; color: Dodgerblue;" class="fas fa-info-circle fa-lg"></i>
+</div>
 <div class="row">
   <div class="col-lg-10"><h1>My Documents</h1></div>
   <div class="col-lg-2 total"><h5>Total: <%=items.length %></h5></div>
@@ -52,7 +76,7 @@
     <form action="/upload" method="POST" enctype="multipart/form-data">
       <div class="upload">
         <input  type="file" id="image" name="image" class="form-control" id="inputGroupFile02">
-        <button  type=submit class="input-group-text" for="inputGroupFile02">Upload</button>
+        <button  type=submit class="input-group-text" onclick="upload()" for="inputGroupFile02">Upload</button>
       </div>
     </form>
   </div>

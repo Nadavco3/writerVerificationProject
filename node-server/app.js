@@ -33,7 +33,7 @@ app.use(function (req, res, next) {
   }
   else {
       //Return a response immediately
-      res.render('login');
+      res.render('login',{failed: false});
   }
 });
 
@@ -51,9 +51,10 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 const saltRounds = 10;
 
-
+//mongodb+srv://liels8:123@cluster0.usywl.mongodb.net/myFirstDatabase?retryWrites=true&w=majority
 //mongo db connection
-mongoDBurl = "mongodb+srv://admin-nadav:123@cluster0.x9oen.mongodb.net/testDB";
+// mongoDBurl = "mongodb+srv://admin-nadav:123@cluster0.x9oen.mongodb.net/testDB";
+mongoDBurl = "mongodb+srv://liels8:123@cluster0.usywl.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 mongoose.connect(mongoDBurl, {useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.set("useCreateIndex",true);
 
@@ -98,9 +99,9 @@ const historySchema = new mongoose.Schema({
 
 const History = new mongoose.model('History', historySchema);
 
-app.get('/', (req, res) => {req.session.User==='undefined'?res.render('login'):res.redirect('/my-documents')});
-app.get('/login', function(req,res){req.session.User==='undefined'?res.render('login'):res.redirect('/my-documents')});
-app.get('/signUp', function(req,res){res.render("signUp");});
+app.get('/', (req, res) => {req.session.User==='undefined'?res.render('login',{failed: false}):res.redirect('/my-documents')});
+app.get('/login', function(req,res){req.session.User==='undefined'?res.render('login',{failed: false}):res.redirect('/my-documents')});
+app.get('/signUp', function(req,res){res.render("signUp",{msg: ""});});
 
 app.get('/my-documents', function(req,res){
     imgModel.find({}, (err, items) => {
@@ -214,9 +215,9 @@ app.post('/confirm-login' ,function(req,res){
           if(result === true){
             req.session.User = user._id;
             req.session.name = user.firstname + " " + user.lastname;
-            res.redirect("/my-documents");
+            res.redirect("/model");
           } else {
-            res.redirect("/login");
+            res.render("login",{failed: true});
           }
         });
       }
@@ -268,20 +269,22 @@ app.post("/delete-document", function(req,res){
 app.post('/add-new-user',function(req,res){
   User.findOne({email: req.body.email},function(err,usr){
     if(usr){
-      console.log("Error EMAIL");
-      res.redirect("/signUp");
+      console.log("Error: EMAIL ALREADY EXIST");
+      res.render("signUp",{msg: "Email is already exist."});
     }
-    else if(!(/^[a-zA-Z]+$/.test(req.body.firstname)) ||(/^[a-zA-Z]+$/.test(req.body.lastname)))
+    else if((/^[a-zA-Z]+$/.test(req.body.firstname)) == false || (/^[a-zA-Z]+$/.test(req.body.lastname)) == false)
     {
-      console.log("NO LETTERS");
-      res.redirect("/signUp");
+      console.log("NO NUMBERS");
+      res.render("signUp",{msg: "First and Last name must contain only letters."});
+    }else if(req.body.password != req.body.confirmpassword){
+      console.log("WRONG PASSWORD");
+      res.render("signUp",{msg: "Incorrect password"});
     }
-
     else{
       bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
         var newUser = new User({
-          firstname: req.body.firstname,
-          lastname: req.body.lastname,
+          firstname: req.body.firstname.charAt(0).toUpperCase() + req.body.firstname.slice(1),
+          lastname: req.body.lastname.charAt(0).toUpperCase() + req.body.lastname.slice(1),
           email: req.body.email,
           password: hash
         });
@@ -346,19 +349,6 @@ app.post('/send-to-model', async function(req,res){
 
 });
 
-app.get('/history', async function(req,res){
-  userDocs = await imgModel.find({userID: req.session.User}, '_id name').exec();
-  History.find({userID: req.session.User}, async function(err, recordsFound){
-    if (err) {
-        console.log(err);
-        res.status(500).send('An error occurred', err);
-    }
-    else {
-      res.render("history",{docs: userDocs, records: recordsFound});
-    }
-  });
-});
-
 app.post('/export-to-csv', function(req,res){
   var writeStream = fs.createWriteStream(req.session.User + ".csv");
   const csvStream = format({ headers: true });
@@ -369,6 +359,11 @@ app.post('/export-to-csv', function(req,res){
     res.download(__dirname + '/' + req.session.User + '.csv');
   });
   createCSVfile(req.body.button, csvStream);
+});
+
+app.post('/delete-history', async function(req,res){
+  deleteHistory(req.body.button);
+  res.redirect('/history');
 });
 
 app.post('/search-history', async function(req,res){
@@ -389,7 +384,7 @@ app.post('/search-history', async function(req,res){
       res.status(500).send('An error occurred', err);
     }
     else {
-      res.render("history",{docs: userDocs, records: recordsFound});
+      res.render("history",{docs: userDocs, records: recordsFound,name:req.session.name});
     }
   });
 });
@@ -451,6 +446,20 @@ function whiteList(path){
   return path === '/add-new-user' || path === '/signUp' || path === '/confirm-login';
 }
 
+async function deleteHistory(data){
+  data = JSON.parse(data);
+  var dataToDelete = [];
+  if(Array.isArray(data)){
+    dataToDelete = data;
+  } else {
+    dataToDelete.push(data);
+  }
+
+  dataToDelete.forEach(async(record) => {
+    await History.deleteOne({_id: record._id}).exec();
+  });
+
+}
 
 function createCSVfile(data,csvStream){
   data = JSON.parse(data);

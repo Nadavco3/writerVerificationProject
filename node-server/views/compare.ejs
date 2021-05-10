@@ -1,15 +1,34 @@
 <%- include("partials/header") %>
 
 <p value="<%=docs%>" id="docs" style="display:none"></p>
-<!-- <h2>Compare</h2> -->
+
 <div id="loading">
   <img id="loading-image" src="Loading.gif" alt="Loading..." />
   <h5>Your documents are being process...</h5>
 </div>
+
 <div id="crop">
     <img id="crop-image" src="Document2.png" width=300 height=400 alt="">
 </div>
+
+<div id="info" class="info-window">
+  <button type="button" class="btn-close" onclick="openCloseInfoWindow()" style="float: right;margin-top: 2px; margin-right: 5px;" name="button"></button>
+  <div id="info-content">
+    <h5>Model Page</h5>
+    <p>Here you can upload your own trained model in order to compare your documents.</p>
+    <p>You can also see all other models you have uploaded and manage them.</p>
+  </div>
+  <div id="info-warning">
+    <p>Notice: You can only upload files of type ".h5"</p>
+  </div>
+</div>
+
+
+
 <div class="row select-body">
+  <div style="float: right;">
+      <i onclick="openCloseInfoWindow()" style="float: right; cursor: pointer; color: Dodgerblue;" class="fas fa-info-circle fa-lg"></i>
+  </div>
   <div class="col lg-5">
     <h3 id="test" >Choose Target Document</h3>
     <div class="choose-box">
@@ -100,18 +119,18 @@
               enableOrientation: true,
               mouseWheelZoom: 'ctrl'
           });
-    
+
       var boundaryDiv = document.getElementsByClassName('cr-boundary')[0];
           boundaryDiv.style.maxWidth = "450px";
           boundaryDiv.style.maxHeight = "550px";
-    
+
       var cropDiv = document.getElementById('crop');
       // crop button
       var cropButton = document.createElement('button');
       cropButton.classList.add("btn", "btn-success");
       cropButton.innerHTML = "Crop & Add";
       cropButton.style.float = "left";
-    
+
       // cancel button
       var cancelButton = document.createElement('button');
       cancelButton.classList.add("btn", "btn-danger");
@@ -120,7 +139,7 @@
 
       cropDiv.appendChild(cropButton);
       cropDiv.appendChild(cancelButton);
-    
+
       function getDocuments(){
         document.getElementById("loading").style.display = "block";
         var targetDoc = {name: document.getElementById("targetImg").name, id: document.getElementById("targetImg").dataset.id,
@@ -146,19 +165,19 @@
         }
         xhr.setRequestHeader('Content-Type', "application/json;charset=UTF-8");
         xhr.send(JSON.stringify({
-    
+
           target: targetDoc,
           compare: compareDocs,
           model: selectedModel
         }));
       }
-    
+
       function showResultsInPage(result,target,compare){
         document.getElementById("loading").style.display = "none";
         document.getElementsByClassName("results-box")[0].style.display = "block";
         document.getElementsByClassName("footer")[0].style.position = "sticky";
         document.getElementById("resultTargetDocumentName").innerHTML = "Target Document Selected: " + "&emsp;" + "<b>"+target.name+"</b>";
-    
+
         var table = document.getElementById("table-body");
         while (table.firstChild) {
           table.removeChild(table.lastChild);
@@ -199,25 +218,25 @@
       function closeCropWindow(){
         document.getElementById('crop').style.display = "none";
       }
-      
-      async function chooseTargetDocument(){  
-    
+
+      async function chooseTargetDocument(){
+
       }
-    
+
       function cropImage_trg(){
         var el = document.getElementById('crop-image');
         var doc = document.getElementById("targetDoc");
-        
+
         el.src = doc.options[doc.selectedIndex].value;
         resize.bind({
             url: el.src,
         });
-    
 
-    
-       
+
+
+
         cropButton.onclick = async()=>{
-          
+
           var targetImg = document.getElementById("targetImg");
           var points = (resize.get()).points;
           var width = parseInt(points[2]) - parseInt(points[0]);
@@ -230,23 +249,23 @@
           document.getElementById("zero-message-target").style.display = "none";
           document.getElementById("chosen-doc").style.display = "block";
           closeCropWindow();
-          
+
           };
           cancelButton.onclick = ()=>{
           closeCropWindow();
         };
-        
+
         var cropDiv = document.getElementById('crop');
         cropDiv.style.display = "block";
-    
+
       }
-    
-  
-    
+
+
+
       function cropImage_cmpr(){
         var el = document.getElementById('crop-image');
         var doc = document.getElementById("compareDoc");
-    
+
         el.src = doc.options[doc.selectedIndex].value;
         resize.bind({
             url: el.src,
@@ -309,8 +328,8 @@
         var cropDiv = document.getElementById('crop');
         cropDiv.style.display = "block";
       }
-    
-    
+
+
       function openDocumentInNewWindow(e){
         console.log(e);
         var docID = this.id;
@@ -328,7 +347,7 @@
           docWindow.document.write("<img src="+documentToView.src+">");
         }
       }
-    
+
       function removeSelectedDocument(){
         var docID = this.id;
         var documentToDelete;
@@ -358,6 +377,6 @@
           }
         }
       }
-    
+
     </script>
 <%- include("partials/footer") %>

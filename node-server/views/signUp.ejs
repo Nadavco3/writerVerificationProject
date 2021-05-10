@@ -18,11 +18,14 @@
       </div>
 
       <form action="/add-new-user" method="post">
-        <input type="text" id="firstname" class="fadeIn second" name="firstname" placeholder="First Name">
-        <input type="text" id="lastname" class="fadeIn third" name="lastname" placeholder="Last Name">
-        <input type="email" id="email" class="fadeIn fourth" name="email" placeholder="Email">
-        <input type="password" id="password" class="fadeIn fifth" name="password" placeholder="Password">
-        <input type="password" id="confirm-password" class="fadeIn sixth" name="confirmpassword" placeholder="Confirm Password">
+        <input type="text" id="firstname" class="fadeIn second" name="firstname" placeholder="First Name" required>
+        <input type="text" id="lastname" class="fadeIn third" name="lastname" placeholder="Last Name" required>
+        <input type="email" id="email" class="fadeIn fourth" name="email" placeholder="Email" required>
+        <input type="password" id="password" class="fadeIn fifth" name="password" placeholder="Password" required>
+        <input type="password" id="confirm-password" class="fadeIn sixth" name="confirmpassword" placeholder="Confirm Password" required>
+        <% if(msg != "") { %>
+          <p style="color: red;" class="fadeIn seventh"><%=msg%></p>
+        <%}%>
         <input type="submit" class="fadeIn seventh" value="Sign Up">
       </form>
 

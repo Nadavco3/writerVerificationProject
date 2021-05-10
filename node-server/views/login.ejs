@@ -18,8 +18,11 @@
       </div>
 
       <form action="/confirm-login" method="post">
-        <input type="text" id="login" class="fadeIn second" name="email" placeholder="Email">
-        <input type="password" id="password" class="fadeIn third" name="password" placeholder="Password">
+        <input type="email" id="login" class="fadeIn second" name="email" placeholder="Email" required>
+        <input type="password" id="password" class="fadeIn third" name="password" placeholder="Password" required>
+      <%  if(failed == true){ %>
+          <p class="fadeIn fourth" style="color: red;">Username or password is incorrect</p>
+        <%}%>
         <input type="submit" class="fadeIn fourth" value="Log In">
       </form>
 

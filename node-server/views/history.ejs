@@ -20,11 +20,21 @@
     </div>
   </div>
 </form>
+
 <div class="result-head">
-  <h3 class="total-records">Total:&emsp;<%=records.length%></h3>
-  <form action="/export-to-csv" method="post">
-      <button type="submit" class="btn btn-success export-all" value="<%=JSON.stringify(records)%>" name="button">Export All to CSV</button>
-  </form>
+  <%if(records.length != 0){%>
+    <h3 class="total-records">Total:&emsp;<%=records.length%></h3>
+    <form action="/export-to-csv" method="post">
+        <button type="submit" class="btn btn-success history-buttons" value="<%=JSON.stringify(records)%>" name="button">Export All to CSV</button>
+    </form>
+    <form action="delete-history" method="post">
+        <button type="submit" class="btn btn-danger history-buttons" value="<%=JSON.stringify(records)%>" name="button">Clear All</button>
+    </form>
+  <%} else { %>
+    <p class="zero-records">We Could'nt Find Any Records...</p>
+  <%}%>
+
+
 
 </div>
 <div class="history-records">
@@ -33,9 +43,15 @@
     <div class="content" id=<%=i%>>
       <h5><%=record.date%></h5>
       <h5 id="resultTargetDocumentName" >Target Document Selected: &emsp;<%=record.target%></h5>
-      <form action="/export-to-csv" method="post">
-        <button type="submit" class="btn btn-success export" value="<%=JSON.stringify(record)%>" name="button">Export to CSV</button>
-      </form>
+      <div class="single-record-buttons">
+        <form action="/export-to-csv" method="post">
+          <button type="submit" class="btn btn-success history-buttons" value="<%=JSON.stringify(record)%>" name="button">Export to CSV</button>
+        </form>
+        <form action="delete-history" method="post">
+            <button type="submit" class="btn btn-danger history-buttons" value="<%=JSON.stringify(record)%>" name="button"><i class="fas fa-trash-alt"></i></button>
+        </form>
+      </div>
+
 
       <table class="table">
         <thead>

@@ -10,9 +10,26 @@
   <img id="loading-image" src="Loading.gif" alt="Loading..." />
   <h4>Uploading the model to server</h4>
 </div>
+
+<div id="info" class="info-window">
+  <button type="button" class="btn-close" onclick="openCloseInfoWindow()" style="float: right;margin-top: 2px; margin-right: 5px;" name="button"></button>
+  <div id="info-content">
+    <h5>Model Page</h5>
+    <p>Here you can upload your own trained model in order to compare your documents.</p>
+    <p>You can also see all other models you have uploaded and manage them.</p>
+  </div>
+  <div id="info-warning">
+    <p>Notice: You can only upload files of type ".h5"</p>
+  </div>
+</div>
+
+<div style="float: right;">
+    <i onclick="openCloseInfoWindow()" style="cursor: pointer; color: Dodgerblue;" class="fas fa-info-circle fa-lg"></i>
+</div>
+
 <div class="model">
   <h3>Uploaded Models</h3>
-  <div class="container vertical-scrollable"> 
+  <div class="container vertical-scrollable">
     <div class="row text-center">
       <% models.forEach(model=>{%>
         <div class="col-sm-8">
@@ -21,10 +38,10 @@
             <input type="hidden" name="modelname" value="<%=model%>">
             <button type="submit" class="btn btn-danger document-button" name="button">Delete</button>
           </form>
-        </div> 
-      <% }) %>  
-    </div> 
-  </div> 
+        </div>
+      <% }) %>
+    </div>
+  </div>
 </div>
 
 <div class="upload-box upload-model">
