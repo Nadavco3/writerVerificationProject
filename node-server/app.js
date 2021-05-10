@@ -89,6 +89,7 @@ const User = new mongoose.model('User',userSchema);
 const historySchema = new mongoose.Schema({
   userID: String,
   date: String,
+  model: String,
   target: String,
   compare: [{
     name: String,
@@ -342,6 +343,7 @@ app.post('/send-to-model', async function(req,res){
     var newRecord = new History({
       userID: req.session.User,
       date: new Date().toISOString().split('T')[0],
+      model: modelName,
       target: target.name,
       compare: compareHistory
     });
