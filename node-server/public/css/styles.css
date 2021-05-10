@@ -1,5 +1,6 @@
 html,body{
   height: 100%;
+  overflow: auto;
 }
 
 .footer {
@@ -341,6 +342,7 @@ input[type="file"]{
 
 .history-records {
 	padding-top: 50px;
+  margin-bottom: 40px;
 }
 
 .total-records {

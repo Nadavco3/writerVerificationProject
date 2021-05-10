@@ -94,20 +94,29 @@ var i;
 
 for (i = 0; i < coll.length; i++) {
   coll[i].addEventListener("click", function() {
+
     this.classList.toggle("active-record");
     var content = $(this).next();
     content.slideToggle("slow");
     this.firstChild.classList.toggle("fa-chevron-down");
     this.firstChild.classList.toggle("fa-chevron-up");
+
   });
+
+  // var coll = document.getElementsByClassName("collapsible");
+  // if(coll.length >= 6){
+  //   document.getElementsByClassName("body")[0].style.height = "max-content";
+  //   document.getElementsByClassName("footer")[0].style.position = "sticky";
+  // }
+
+  // function pageHeightToggle(){
+  //   let bodyElemnent = document.getElementsByClassName("body")[0]
+  //   if(bodyElemnent.style.height==="max-content"){
+
+  //   }
+  // }
+
 }
 </script>
 
 <%- include("partials/footer") %>
-<script type="text/javascript">
-  var coll = document.getElementsByClassName("collapsible");
-  if(coll.length >= 6){
-    document.getElementsByClassName("body")[0].style.height = "max-content";
-    document.getElementsByClassName("footer")[0].style.position = "sticky";
-  }
-</script>
