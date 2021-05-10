@@ -42,7 +42,10 @@
     <button type="button" class="collapsible"><i class="fas fa-chevron-down"></i>&emsp;<%=record.date%>&emsp;<%=record.target%></button>
     <div class="content" id=<%=i%>>
       <h5><%=record.date%></h5>
-      <h5 id="resultTargetDocumentName" >Target Document Selected: &emsp;<%=record.target%></h5>
+      <div style="display: flex;">
+        <h5 id="resultTargetDocumentName" style="padding-right: 70px;">Target Document Selected: &emsp;<%=record.target%></h5>
+        <h5 id="resultModelName">Model: &emsp;<%=record.model%></h5>
+      </div>
       <div class="single-record-buttons">
         <form action="/export-to-csv" method="post">
           <button type="submit" class="btn btn-success history-buttons" value="<%=JSON.stringify(record)%>" name="button">Export to CSV</button>

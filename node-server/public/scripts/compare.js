@@ -74,6 +74,7 @@
       document.getElementsByClassName("results-box")[0].style.display = "block";
       document.getElementsByClassName("footer")[0].style.position = "sticky";
       document.getElementById("resultTargetDocumentName").innerHTML = "Target Document Selected: " + "&emsp;" + "<b>"+target.name+"</b>";
+      document.getElementById("resultModelName").innerHTML = "Model: " + "&emsp;" + document.getElementById("selectModel").value;
 
       var table = document.getElementById("table-body");
       while (table.firstChild) {
@@ -168,7 +169,7 @@
         buttonView.classList.add("btn", "btn-primary" ,"document-button");
         buttonView.onclick = ()=>{
           targetImg = document.getElementById("targetImg");
-          openWindow(targetImg.src);
+          openWindow(targetImg);
         }
         buttonView.id = targetImg.dataset.id;
 

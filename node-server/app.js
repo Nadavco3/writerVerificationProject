@@ -131,7 +131,7 @@ app.get('/compare', function(req,res){
           console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
           console.log('body:',body); // Print the data received
           modelsNames = JSON.parse(body)
-          modelsNames.push("Defualt-model");
+          modelsNames.push("Default-model");
           modelsNames.reverse()
           res.render('compare', { docs: items ,models : modelsNames,name:req.session.name});
         });
@@ -445,6 +445,7 @@ function createCSVfile(data,csvStream){
     csvStream.write({
       date: record.date,
       target: record.target,
+      model: record.model,
       comparedDocumentName: '',
       compatibility: '',
       assesment: ''

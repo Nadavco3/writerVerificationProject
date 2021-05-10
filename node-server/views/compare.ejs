@@ -79,7 +79,7 @@
     <div class="horizontalLine">
       <div class="row">
         <div class="col-sm-3">
-          <select name="selectedModel" class="form-control" onfocus='this.size=2;' onblur='this.size=1;' onchange='this.size=1; this.blur();'>
+          <select id="selectModel" name="selectedModel" class="form-control" onfocus='this.size=2;' onblur='this.size=1;' onchange='this.size=1; this.blur();'>
             <% models.forEach(model=>{%>
               <option value=<%=model%>> <%=model%> </option>
             <% }) %>
@@ -93,7 +93,10 @@
 </div>
     <div class="results-box">
       <h3>Results</h3>
-      <h5 id="resultTargetDocumentName" >Target Document Selected: </h5>
+      <div style="display: flex;">
+        <h5 id="resultTargetDocumentName" style="padding-right: 85px;">Target Document Selected: </h5>
+        <h5 id="resultModelName">Model: </h5>
+      </div>
       <table class="table">
         <thead>
           <tr>
