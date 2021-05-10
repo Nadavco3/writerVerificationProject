@@ -89,6 +89,7 @@ const User = new mongoose.model('User',userSchema);
 const historySchema = new mongoose.Schema({
   userID: String,
   date: String,
+  model: String,
   target: String,
   compare: [{
     name: String,
@@ -130,7 +131,7 @@ app.get('/compare', function(req,res){
           console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
           console.log('body:',body); // Print the data received
           modelsNames = JSON.parse(body)
-          modelsNames.push("Defualt-model");
+          modelsNames.push("Default-model");
           modelsNames.reverse()
           res.render('compare', { docs: items ,models : modelsNames,name:req.session.name});
         });
@@ -310,6 +311,7 @@ app.post('/send-to-model', async function(req,res){
     var newRecord = new History({
       userID: req.session.User,
       date: new Date().toISOString().split('T')[0],
+      model: modelName,
       target: target.name,
       compare: compareHistory
     });
@@ -443,6 +445,7 @@ function createCSVfile(data,csvStream){
     csvStream.write({
       date: record.date,
       target: record.target,
+      model: record.model,
       comparedDocumentName: '',
       compatibility: '',
       assesment: ''

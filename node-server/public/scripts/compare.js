@@ -10,18 +10,18 @@
             enableOrientation: true,
             mouseWheelZoom: 'ctrl'
         });
-  
+
     var boundaryDiv = document.getElementsByClassName('cr-boundary')[0];
         boundaryDiv.style.maxWidth = "450px";
         boundaryDiv.style.maxHeight = "550px";
-  
+
     var cropDiv = document.getElementById('crop');
     // crop button
     var cropButton = document.createElement('button');
     cropButton.classList.add("btn", "btn-success");
     cropButton.innerHTML = "Crop & Add";
     cropButton.style.float = "left";
-  
+
     // cancel button
     var cancelButton = document.createElement('button');
     cancelButton.classList.add("btn", "btn-danger");
@@ -30,13 +30,19 @@
 
     cropDiv.appendChild(cropButton);
     cropDiv.appendChild(cancelButton);
-  
+
     function getDocuments(){
+      var target = document.getElementById("targetImg");
+      var chosenDocs = document.getElementsByClassName("chose-img");
+      console.log(target,chosenDocs);
+      if(target == null || chosenDocs.length == 0){
+        alert("You have to choose target document and at least on more document to compare.");
+        return;
+      }
       document.getElementById("loading").style.display = "block";
       var targetDoc = {name: document.getElementById("targetImg").name, id: document.getElementById("targetImg").dataset.id,
       points:document.getElementById("targetImg").dataset.points};
       var compareDocs = [];
-      var chosenDocs = document.getElementsByClassName("chose-img");
       const selectedModel = document.getElementsByName("selectedModel")[0].value;
       for(var i=0; i<chosenDocs.length; i++){
         compareDocs.push({name: chosenDocs[i].name, id: chosenDocs[i].dataset.id, points:chosenDocs[i].dataset.points});
@@ -56,19 +62,20 @@
       }
       xhr.setRequestHeader('Content-Type', "application/json;charset=UTF-8");
       xhr.send(JSON.stringify({
-  
+
         target: targetDoc,
         compare: compareDocs,
         model: selectedModel
       }));
     }
-  
+
     function showResultsInPage(result,target,compare){
       document.getElementById("loading").style.display = "none";
       document.getElementsByClassName("results-box")[0].style.display = "block";
       document.getElementsByClassName("footer")[0].style.position = "sticky";
       document.getElementById("resultTargetDocumentName").innerHTML = "Target Document Selected: " + "&emsp;" + "<b>"+target.name+"</b>";
-  
+      document.getElementById("resultModelName").innerHTML = "Model: " + "&emsp;" + document.getElementById("selectModel").value;
+
       var table = document.getElementById("table-body");
       while (table.firstChild) {
         table.removeChild(table.lastChild);
@@ -109,27 +116,27 @@
     function closeCropWindow(){
       document.getElementById('crop').style.display = "none";
     }
-    
- 
+
+
     function cropImage_trg(){
       var el = document.getElementById('crop-image');
       var doc = document.getElementById("targetDoc");
-      
+
       el.src = doc.options[doc.selectedIndex].value;
       resize.bind({
           url: el.src,
       });
-  
+
         var cropDiv = document.getElementById('crop');
         cropDiv.style.display = "block";
-  
-     
+
+
       cropButton.onclick = async()=>{
         var olditemsDiv= document.getElementById("itemsDiv")
         if(olditemsDiv!=undefined){
           olditemsDiv.remove();
         }
-          
+
         var targetImg = document.createElement("img");
         var itemsDiv = document.createElement("div");
         var infoDiv = document.createElement("div");
@@ -141,7 +148,7 @@
         var buttonView = document.createElement("button");
         var buttonRemove = document.createElement("button");
         var node;
-        
+
         infoDiv.classList.add("infoDiv");
         infoDiv.classList.add("infoDivtarget")
         targetImg.classList.add("target-img");
@@ -154,18 +161,18 @@
         node = document.createTextNode(targetImg.name);
         docTitle = document.createElement("h5");
         docTitle.appendChild(node);
-        
+
 
         infoDiv.appendChild(docTitle);
-        
+
         buttonView.innerHTML = "View&emsp;" + '<i class="fas fa-expand"></i>';
         buttonView.classList.add("btn", "btn-primary" ,"document-button");
         buttonView.onclick = ()=>{
           targetImg = document.getElementById("targetImg");
-          openWindow(targetImg.src);
+          openWindow(targetImg);
         }
         buttonView.id = targetImg.dataset.id;
-        
+
         buttonRemove.innerHTML = "Remove&emsp;" + '<i class="fas fa-trash-alt"></i>';
         buttonRemove.classList.add("btn", "btn-danger" ,"document-button");
         buttonRemove.id = targetImg.dataset.id;
@@ -182,25 +189,25 @@
 
         document.getElementById("chosen-doc").appendChild(itemsDiv);
 
-      
+
         document.getElementById("zero-message-target").style.display = "none";
         document.getElementById("chosen-doc").style.display = "block";
-        closeCropWindow();  
+        closeCropWindow();
         };
         cancelButton.onclick = ()=>{
         closeCropWindow();
       };
-      
 
-  
+
+
     }
-  
 
-  
+
+
     function cropImage_cmpr(){
       var el = document.getElementById('crop-image');
       var doc = document.getElementById("compareDoc");
-  
+
       el.src = doc.options[doc.selectedIndex].value;
       resize.bind({
           url: el.src,
@@ -261,8 +268,8 @@
       var cropDiv = document.getElementById('crop');
       cropDiv.style.display = "block";
     }
-  
-  
+
+
     function openDocumentInNewWindow(e){
       var docID = this.id;
       var allDocs = document.getElementsByClassName("chose-img");
@@ -273,15 +280,17 @@
         }
       }
       if(documentToView){
-        openWindow(documentToView.src);
+        openWindow(documentToView);
       }
     }
 
-    function openWindow(src){
-      var docWindow = window.open("", "Document", "width=500,height=700");    
-      docWindow.document.write("<img src="+src+">");
+    function openWindow(documentToView){
+      var docW = documentToView.width * 1.5;
+      var docH = documentToView.height * 1.5;
+      var docWindow = window.open("", "Document", "width=" + docW + ",height=" + docH);
+      docWindow.document.write("<img width=" + docW + " height=" + docH + " src="+documentToView.src+">");
     }
-  
+
     function removeSelectedDocument(){
       var docID = this.id;
       var documentToDelete;
