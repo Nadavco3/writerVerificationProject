@@ -28,8 +28,25 @@ app.use(bodyParser.json());
 app.use(busboy({highWaterMark: 2 * 1024 * 1024,}));
 app.use(session({secret: 'keyboard cat',resave: false,saveUninitialized: false,expires:false}));//, expires:false}
 app.use(function (req, res, next) {
-  if( whiteList(req.path) || typeof req.session.User !== 'undefined'){
-      next();
+  if(whiteList(req.path) ||typeof req.session.User !== 'undefined'){
+    console.log(req.session.usertype);
+    if(req.session.usertype === 'user'){//user validation access
+        if(!adminWhiteList(req.path)){
+          next();
+        }
+        else{
+          res.send("Error access forbiden! 1");
+        }
+    }
+    else{//admin validation access
+      if(adminWhiteList(req.path)){
+        next();
+      }
+      else{
+        res.send("Error access forbiden! 2");
+      }
+
+    }
   }
   else {
       //Return a response immediately
@@ -79,7 +96,8 @@ const userSchema = new mongoose.Schema({
   firstname: String,
   lastname:String,
   email:String,
-  password: String
+  password: String,
+  usertype: String
 });
 
 const User = new mongoose.model('User',userSchema);
@@ -184,7 +202,11 @@ app.post('/confirm-login' ,function(req,res){
           if(result === true){
             req.session.User = user._id;
             req.session.name = user.firstname + " " + user.lastname;
-            res.redirect("/model");
+            req.session.usertype = user.usertype;
+            if(user.usertype==="user")
+              res.redirect("/my-documents");
+            else
+              res.send("welcome admin " + req.session.name);
           } else {
             res.render("login",{failed: true});
           }
@@ -255,7 +277,8 @@ app.post('/add-new-user',function(req,res){
           firstname: req.body.firstname.charAt(0).toUpperCase() + req.body.firstname.slice(1),
           lastname: req.body.lastname.charAt(0).toUpperCase() + req.body.lastname.slice(1),
           email: req.body.email,
-          password: hash
+          password: hash,
+          usertype: "user"
         });
         newUser.save();
         req.session.User = newUser._id;
@@ -415,6 +438,10 @@ app.post('/delete-model', function(req,res){
 
 function whiteList(path){
   return path === '/add-new-user' || path === '/signUp' || path === '/confirm-login';
+}
+
+function adminWhiteList(path){
+  return path === '/admin-mainscreen';
 }
 
 async function deleteHistory(data){
