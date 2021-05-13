@@ -1,9 +1,8 @@
-<%- include("partials/header") %>
-    <h1>welcome admin</h1>
+<%- include("partials/header-admin") %>
     <div class="upload-box upload-model">
-        <h3 style="text-align: center;">Upload new defualt model</h3>
+        <h3 style="text-align: center;">Upload new default model</h3>
         <div class="input-group mb-3" >
-            <form action="upload-model" method="post" enctype="multipart/form-data">
+            <form action="/admin-upload-model" method="post" enctype="multipart/form-data">
             <div class="upload">
               <input  type="file" name="fileToUpload" class="form-control" id="inputGroupFile02">
               <button  type=submit class="input-group-text" for="inputGroupFile02" onclick="upload()">Upload</button>

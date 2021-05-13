@@ -451,16 +451,54 @@ app.post('/delete-model', function(req,res){
 
 });
 
-app.get('/admin-upload-model',function(req,res){
-  res.render('adminModel');
+app.get('/admin-model',function(req,res){
+  res.render('adminModel',{name:req.session.name});
 });
+
+app.post('/admin-upload-model',function(req,res){
+  req.pipe(req.busboy); // Pipe it trough busboy
+
+  req.busboy.on('file', (fieldname, file, filename) => {
+      const fileType = filename.split('.')[1];
+      if( !(fileType === 'h5' || fileType ==='keras')){
+          console.log("Error Type model");
+          res.redirect('/model');
+          return;
+
+      }
+      console.log(`Upload of '${filename}' started`);
+      const uploadPath = path.join(__dirname,'temp-upload-model/'+ req.session.User); // Register the upload path
+      fs_extra.ensureDir(uploadPath); // Make sure that he upload path exits
+      // Create a write stream of the new file
+      const fstream = fs.createWriteStream(path.join(uploadPath, filename));
+      // Pipe it trough
+      file.pipe(fstream);
+
+      // On finish of the upload
+      fstream.on('close', () => {
+          console.log(`Upload of '${filename}' finished`);
+
+          options = {
+            model: fs.createReadStream(uploadPath + '/' + filename),
+            dir: 'default-model'
+          }
+          request.post({url:'http://127.0.0.1:5000/upload-default', formData: options}, function(error, response, body) {
+            console.error('error:', error); // Print the error
+            console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+            console.log('body:', body); // Print the data received
+            res.redirect('/admin-model');
+            deleteFileAndDirectory('temp-upload-model/'+req.session.User);
+          });
+      });
+  });
+})
 
 function whiteList(path){
   return path === '/add-new-user' || path === '/signUp' || path === '/confirm-login';
 }
 
 function adminWhiteList(path){
-  return path === '/admin-menu' || path === '/users' || path === "/delete-user";
+  return path === '/admin-menu' || path === '/users' || path === "/delete-user" || path === '/admin-upload-model' || path === '/admin-model';
 }
 
 async function deleteHistory(data){

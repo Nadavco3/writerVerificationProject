@@ -54,8 +54,9 @@ def verifyWriter():
         i+=1
         img = img[int(points[1]):int(points[3]),int(points[0]):int(points[2])]
         compareDocs.append(img)
-    if(modelName == 'Defualt-model'):
-        model = keras.models.load_model('modelGoodResults2.h5')
+    if(modelName == 'Default-model'):
+        mdl_uploads_dir = os.path.join(app.instance_path[:len(app.instance_path)-8],'default-model')
+        model = keras.models.load_model(mdl_uploads_dir + '/'  + os.listdir(mdl_uploads_dir)[0])
     else:
         model = keras.models.load_model(os.path.join(app.instance_path,  'models' + '/' + userID + '/' + modelName ))
     results = predictByModel(targetDoc,compareDocs,model)
@@ -87,6 +88,14 @@ def deleteModel():
         return "Error"
     os.remove(usr_uploads_dir + "/"  + request.form['modelName'])
     return jsonify(os.listdir(usr_uploads_dir))
+
+@app.route('/upload-default', methods=['POST'])
+def uploadDefualtModel():
+    modelFile = request.files['model']  
+    mdl_uploads_dir = os.path.join(app.instance_path[:len(app.instance_path)-8],'default-model')
+    os.remove(mdl_uploads_dir + "/"  + os.listdir(mdl_uploads_dir)[0])
+    modelFile.save(os.path.join(mdl_uploads_dir , 'default-model.h5'))
+    return "success"
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
