@@ -231,6 +231,7 @@ app.post('/confirm-login' ,function(req,res){
               res.redirect("/my-documents" );
             else
               res.redirect("/users");
+
           } else {
             res.render("login",{failed: true});
           }
@@ -240,10 +241,6 @@ app.post('/confirm-login' ,function(req,res){
       }
     }
   });
-});
-
-app.get("/admin-menu",function(req,res){
-  res.render("adminMenu");
 });
 
 app.post('/upload',upload.single('image'),(req, res, next) => {
@@ -464,6 +461,10 @@ app.post('/delete-model', function(req,res){
     res.redirect("/model");
   });
 
+});
+
+app.get('/admin-upload-model',function(req,res){
+  res.render('adminModel');
 });
 
 function whiteList(path){
