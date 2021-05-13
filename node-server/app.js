@@ -176,8 +176,21 @@ app.get("/users", function(req,res){
   User.find({usertype: "user"}, function(err, foundUsers){
     if(err){
       console.log(err);
+      res.status(500).send('An error occurred', err);
     } else {
-        res.render("users",{users: foundUsers});
+        res.render("users",{users: foundUsers, name:req.session.name});
+    }
+  });
+});
+
+app.post("/delete-user", function(req,res){
+  var userToDelete = req.body.button;
+  User.deleteOne({_id: userToDelete}, function(err){
+    if(err){
+      console.log(err);
+      res.status(500).send('An error occurred', err);
+    } else {
+      res.redirect("/users");
     }
   });
 });
@@ -205,11 +218,13 @@ app.post('/confirm-login' ,function(req,res){
             if(user.usertype==="user")
               res.redirect("/my-documents" );
             else
-              res.redirect("/admin-menu");
+              res.redirect("/users");
           } else {
             res.render("login",{failed: true});
           }
         });
+      } else {
+        res.render("login",{failed: true});
       }
     }
   });
@@ -444,7 +459,7 @@ function whiteList(path){
 }
 
 function adminWhiteList(path){
-  return path === '/admin-menu';
+  return path === '/admin-menu' || path === '/users' || path === "/delete-user";
 }
 
 async function deleteHistory(data){
