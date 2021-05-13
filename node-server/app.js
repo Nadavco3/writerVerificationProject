@@ -183,9 +183,21 @@ app.get("/users", function(req,res){
   });
 });
 
-app.post("/delete-user", function(req,res){
-  var userToDelete = req.body.button;
-  User.deleteOne({_id: userToDelete}, function(err){
+app.post("/delete-user", async function(req,res){
+  var userIdToDelete = req.body.button;
+  //Delete All user's uploaded documents
+  await imgModel.deleteMany({userID: userIdToDelete}).exec();
+  //Delete All user's uploaded models
+  options = {
+    id: userIdToDelete
+  }
+  request.post({url:'http://127.0.0.1:5000/delete-user-models', formData: options}, function(error, response, body) {
+    console.error('error:', error); // Print the error
+    console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+    console.log('body:', body); // Print the data received
+  });
+  //Delete user
+  User.deleteOne({_id: userIdToDelete}, function(err){
     if(err){
       console.log(err);
       res.status(500).send('An error occurred', err);
@@ -407,7 +419,7 @@ app.route('/upload-model').post((req, res, next) => {
 
   req.busboy.on('file', (fieldname, file, filename) => {
       const fileType = filename.split('.')[1];
-      if( !(fileType === 'h5' || fileType ==='keras')){
+      if( !(fileType === 'txt' || fileType ==='keras')){
           console.log("Error Type model");
           res.redirect('/model');
           return;

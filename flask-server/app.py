@@ -9,6 +9,7 @@ from keras.models import Model
 import matplotlib.pyplot as plt
 from preprocessing import *
 from flask import jsonify
+import shutil
 
 
 app = Flask(__name__)
@@ -87,6 +88,14 @@ def deleteModel():
         return "Error"
     os.remove(usr_uploads_dir + "/"  + request.form['modelName'])
     return jsonify(os.listdir(usr_uploads_dir))
+
+@app.route('/delete-user-models', methods=['POST'])
+def deleteAllModels():
+    usr_uploads_dir = os.path.join(app.instance_path,  'models' + '/' + request.form['id'])
+    if(not os.path.isdir(usr_uploads_dir)):
+        return "Error"
+    shutil.rmtree(usr_uploads_dir)
+    return "Succefully deleted"
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
