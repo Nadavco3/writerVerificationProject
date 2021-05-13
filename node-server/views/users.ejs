@@ -1,0 +1,26 @@
+<%- include("partials/header-admin") %>
+
+<h3>Users</h3>
+
+<div>
+  <%users.forEach(function(user){ %>
+    <div class="row user-div">
+      <div class="user-details col-lg-3">
+        <h5>Email:&emsp;<%=user.email%></h5>
+      </div>
+      <div class="user-details col-lg-8">
+        <h5>Name:&emsp;<%=user.firstname%></h5>
+        <h5><%=user.lastname%></h5>
+      </div>
+      <div class="user-buttons col-lg-1">
+        <form action="/delete-user" method="post">
+            <button type="submit" class="btn btn-danger" name="button" value="<%=user._id%>">Delete</button>
+        </form>
+      </div>
+    </div>
+  <%});%>
+
+</div>
+
+
+<%- include("partials/footer") %>
