@@ -315,7 +315,7 @@ input[type="file"]{
 	margin-left: auto;
 }
 
-.collapsible {
+.collapsible, .user-div{
   background-color: #48466d;
   color: white;
   cursor: pointer;
@@ -326,6 +326,14 @@ input[type="file"]{
   text-align: left;
   outline: none;
   font-size: 18px;
+}
+
+.user-details {
+  float: left
+}
+
+.user-buttons {
+  float: right
 }
 
 .active-record, .collapsible:hover {

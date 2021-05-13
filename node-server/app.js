@@ -183,6 +183,15 @@ app.get('/model', function(req,res){
 
 });
 
+app.get("/users", function(req,res){
+  User.find({usertype: "user"}, function(err, foundUsers){
+    if(err){
+      console.log(err);
+    } else {
+        res.render("users",{users: foundUsers});
+    }
+  });
+});
 
 app.get('/LogOut', async function(req,res){
     req.session.destroy();

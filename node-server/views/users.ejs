@@ -1,0 +1,22 @@
+<%- include("partials/header") %>
+
+<h5>Users</h5>
+
+<div>
+  users.forEach(function(user){
+    <div class="user-div">
+      <div class="user-details">
+        <h5><%=user.email%></h5>
+        <h5><%=user.firstname%></h5>
+        <h5><%=user.lastname%></h5>
+      </div>
+      <div class="user-buttons">
+        <button type="button" class="btn btn-danger" name="button">Delete</button>
+      </div>
+    </div>
+  });
+
+</div>
+
+
+<%- include("partials/footer") %>
