@@ -196,7 +196,7 @@ app.post('/confirm-login' ,function(req,res){
             if(user.usertype==="user")
               res.redirect("/my-documents" );
             else
-              res.redirect("/admin-menu");
+              res.redirect("/admin-upload-model");
           } else {
             res.render("login",{failed: true});
           }
@@ -204,10 +204,6 @@ app.post('/confirm-login' ,function(req,res){
       }
     }
   });
-});
-
-app.get("/admin-menu",function(req,res){
-  res.render("adminMenu");
 });
 
 app.post('/upload',upload.single('image'),(req, res, next) => {
@@ -430,12 +426,16 @@ app.post('/delete-model', function(req,res){
 
 });
 
+app.get('/admin-upload-model',function(req,res){
+  res.render('adminModel');
+});
+
 function whiteList(path){
   return path === '/add-new-user' || path === '/signUp' || path === '/confirm-login';
 }
 
 function adminWhiteList(path){
-  return path === '/admin-menu';
+  return path === '/admin-menu' || path === '/admin-upload-model';
 }
 
 async function deleteHistory(data){
