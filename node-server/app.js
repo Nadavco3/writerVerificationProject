@@ -28,25 +28,14 @@ app.use(bodyParser.json());
 app.use(busboy({highWaterMark: 2 * 1024 * 1024,}));
 app.use(session({secret: 'keyboard cat',resave: false,saveUninitialized: false,expires:false}));//, expires:false}
 app.use(function (req, res, next) {
-  if(whiteList(req.path) ||typeof req.session.User !== 'undefined'){
-    console.log(req.session.usertype);
-    if(req.session.usertype === 'user'){//user validation access
-        if(!adminWhiteList(req.path)){
-          next();
-        }
-        else{
-          res.send("Error access forbiden! 1");
-        }
-    }
-    else{//admin validation access
-      if(adminWhiteList(req.path)){
-        next();
-      }
-      else{
-        res.send("Error access forbiden! 2");
-      }
-
-    }
+  if(whiteList(req.path)){
+      next();
+  }
+  else if(typeof req.session.User !== 'undefined' && req.session.usertype ==='user' && !adminWhiteList(req.path)){
+      next();
+  }
+  else if(typeof req.session.User !== 'undefined' && req.session.usertype ==='admin' && adminWhiteList(req.path)){
+      next();
   }
   else {
       //Return a response immediately
@@ -212,10 +201,11 @@ app.post('/confirm-login' ,function(req,res){
             req.session.User = user._id;
             req.session.name = user.firstname + " " + user.lastname;
             req.session.usertype = user.usertype;
+
             if(user.usertype==="user")
-              res.redirect("/my-documents");
+              res.redirect("/my-documents" );
             else
-              res.send("welcome admin " + req.session.name);
+              res.redirect("/admin-menu");
           } else {
             res.render("login",{failed: true});
           }
@@ -223,6 +213,10 @@ app.post('/confirm-login' ,function(req,res){
       }
     }
   });
+});
+
+app.get("/admin-menu",function(req,res){
+  res.render("adminMenu");
 });
 
 app.post('/upload',upload.single('image'),(req, res, next) => {
@@ -450,7 +444,7 @@ function whiteList(path){
 }
 
 function adminWhiteList(path){
-  return path === '/admin-mainscreen';
+  return path === '/admin-menu';
 }
 
 async function deleteHistory(data){
