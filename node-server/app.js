@@ -133,7 +133,7 @@ app.get('/compare', function(req,res){
         options = {
           id: req.session.User,
         }
-        request.post({url:'http://127.0.0.1:5000/get-user-models', formData: options}, function(error, response, body) {
+        request.post({url:'http://34.78.83.195:5000/get-user-models', formData: options}, function(error, response, body) {
           console.error('error:', error); // Print the error
           console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
           console.log('body:',body); // Print the data received
@@ -163,13 +163,17 @@ app.get('/model', function(req,res){
   options = {
     id: req.session.User,
   }
-  request.post({url:'http://127.0.0.1:5000/get-user-models', formData: options}, function(error, response, body) {
+  request.post({url:'http://34.78.83.195:5000/get-user-models', formData: options}, function(error, response, body) {
     console.error('error:', error); // Print the error
     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
     console.log('body:', body); // Print the data received
     res.render("model",{models :JSON.parse(body),name:req.session.name});
   });
 
+});
+
+app.get("/about", function(req,res){
+  res.render("about",{name:req.session.name});
 });
 
 app.get("/users", function(req,res){
@@ -191,7 +195,7 @@ app.post("/delete-user", async function(req,res){
   options = {
     id: userIdToDelete
   }
-  request.post({url:'http://127.0.0.1:5000/delete-user-models', formData: options}, function(error, response, body) {
+  request.post({url:'http://34.78.83.195:5000/delete-user-models', formData: options}, function(error, response, body) {
     console.error('error:', error); // Print the error
     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
     console.log('body:', body); // Print the data received
@@ -230,7 +234,7 @@ app.post('/confirm-login' ,function(req,res){
             if(user.usertype==="user")
               res.redirect("/my-documents" );
             else
-              res.redirect("/users");
+              res.redirect("/admin-model");
 
           } else {
             res.render("login",{failed: true});
@@ -344,7 +348,7 @@ app.post('/send-to-model', async function(req,res){
   }
   console.log(comparePoints,typeof(comparePoints[0]));
   //'http://127.0.0.1:5000/flask'
-  request.post({url:'http://127.0.0.1:5000/flask', formData: options}, function(error, response, body) {
+  request.post({url:'http://34.78.83.195:5000/flask', formData: options}, function(error, response, body) {
     console.error('error:', error); // Print the error
     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
     console.log('body:', body); // Print the data received
@@ -416,7 +420,7 @@ app.route('/upload-model').post((req, res, next) => {
 
   req.busboy.on('file', (fieldname, file, filename) => {
       const fileType = filename.split('.')[1];
-      if( !(fileType === 'txt' || fileType ==='keras')){
+      if( !(fileType === 'h5' || fileType ==='keras')){
           console.log("Error Type model");
           res.redirect('/model');
           return;
@@ -438,7 +442,7 @@ app.route('/upload-model').post((req, res, next) => {
             model: fs.createReadStream(uploadPath + '/' + filename),
             id: req.session.User
           }
-          request.post({url:'http://127.0.0.1:5000/upload', formData: options}, function(error, response, body) {
+          request.post({url:'http://34.78.83.195:5000/upload', formData: options}, function(error, response, body) {
             console.error('error:', error); // Print the error
             console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
             console.log('body:', body); // Print the data received
@@ -454,7 +458,7 @@ app.post('/delete-model', function(req,res){
     id: req.session.User,
     modelName: req.body.modelname
   }
-  request.post({url:'http://127.0.0.1:5000/delete-model', formData: options}, function(error, response, body) {
+  request.post({url:'http://34.78.83.195:5000/delete-model', formData: options}, function(error, response, body) {
     console.error('error:', error); // Print the error
     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
     console.log('body:', body); // Print the data received
@@ -494,7 +498,7 @@ app.post('/admin-upload-model',function(req,res){
             model: fs.createReadStream(uploadPath + '/' + filename),
             dir: 'default-model'
           }
-          request.post({url:'http://127.0.0.1:5000/upload-default', formData: options}, function(error, response, body) {
+          request.post({url:'http://34.78.83.195:5000/upload-default', formData: options}, function(error, response, body) {
             console.error('error:', error); // Print the error
             console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
             console.log('body:', body); // Print the data received

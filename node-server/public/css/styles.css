@@ -219,8 +219,8 @@ input[type="file"]{
   z-index: 99;
   background-color: #f6dcbf;
   width: 350px;
-  height: 400px;
-  max-height: 400px;
+  height: 425px;
+  max-height: 425px;
   border-radius: 10px;
   left: 40%;
   top: 10%;
@@ -237,7 +237,7 @@ input[type="file"]{
   color: #fff;
   background-color: #31326f;
   min-height: 250px;
-  max-height: 340px;
+  max-height: 365px;
 }
 
 #info-warning {
@@ -251,6 +251,58 @@ input[type="file"]{
   margin-top: 0px !important;
 }
 
+.carousel-indicators [data-bs-target] {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: #31326f;
+}
+
+.sticky {
+  position: fixed;
+  top: 0;
+  width: 100%;
+}
+
+.headline{
+  padding-top: 20px;
+  padding-left: 150px;
+}
+
+.about-us p{
+  font-size: 18px;
+  text-align: center;
+}
+
+.about-us {
+  margin-top: 58px;
+}
+
+.about-us-brief{
+  padding-top: 50px;
+  padding-bottom: 50px;
+  width: 60%;
+  margin: auto;
+  margin-bottom: 0;
+}
+
+.authors{
+  width: 75%;
+  margin: auto;
+  padding-top: 65px;
+  display: flex;
+}
+
+.author-details {
+  display: grid;
+  text-align: center;
+}
+
+.author-details img{
+  border-radius: 50%;
+  margin: auto;
+  padding-bottom: 10px;
+}
 /* .crop-image {
   width: 50%
   margin auto;
