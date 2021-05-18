@@ -1,4 +1,4 @@
-// require("dotenv").config();
+require("dotenv").config();
 //import libries
 const express = require("express");
 const ejs = require("ejs");
@@ -57,10 +57,17 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 const saltRounds = 10;
 
-//mongodb+srv://liels8:123@cluster0.usywl.mongodb.net/myFirstDatabase?retryWrites=true&w=majority
 //mongo db connection
 // mongoDBurl = "mongodb+srv://admin-nadav:123@cluster0.x9oen.mongodb.net/testDB";
-mongoDBurl = "mongodb+srv://liels8:123@cluster0.usywl.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+// mongoDBurl = "mongodb+srv://liels8:123@cluster0.usywl.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+
+const env = process.env.NODE_ENV;
+if(env === 'test'){
+  mongoDBurl = "mongodb+srv://liels8:123@cluster0.usywl.mongodb.net/test?retryWrites=true&w=majority"
+} else {
+  mongoDBurl = "mongodb+srv://liels8:123@cluster0.usywl.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+}
+console.log(env == 'test');
 mongoose.connect(mongoDBurl, {useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.set("useCreateIndex",true);
 
@@ -77,7 +84,7 @@ const imageSchema = new mongoose.Schema({
         contentType: String
     }
 });
-const imgModel = new mongoose.model('Image', imageSchema);
+const Document = new mongoose.model('Image', imageSchema);
 
 //users schema for mongo db
 
@@ -112,7 +119,7 @@ app.get('/login', function(req,res){req.session.User==='undefined'?res.render('l
 app.get('/signUp', function(req,res){res.render("signUp",{msg: ""});});
 
 app.get('/my-documents', function(req,res){
-    imgModel.find({userID: req.session.User }, (err, items) => {
+    Document.find({userID: req.session.User }, (err, items) => {
         if (err) {
             console.log(err);
             res.status(500).send('An error occurred', err);
@@ -124,7 +131,7 @@ app.get('/my-documents', function(req,res){
 });
 
 app.get('/compare', function(req,res){
-  imgModel.find({userID: req.session.User}, (err, items) => {
+  Document.find({userID: req.session.User}, (err, items) => {
       if (err) {
           console.log(err);
           res.status(500).send('An error occurred', err);
@@ -147,7 +154,7 @@ app.get('/compare', function(req,res){
 });
 
 app.get('/history', async function(req,res){
-  userDocs = await imgModel.find({userID: req.session.User}).exec();
+  userDocs = await Document.find({userID: req.session.User}).exec();
   History.find({userID: req.session.User}, async function(err, recordsFound){
     if (err) {
         console.log(err);
@@ -190,7 +197,7 @@ app.get("/users", function(req,res){
 app.post("/delete-user", async function(req,res){
   var userIdToDelete = req.body.button;
   //Delete All user's uploaded documents
-  await imgModel.deleteMany({userID: userIdToDelete}).exec();
+  await Document.deleteMany({userID: userIdToDelete}).exec();
   //Delete All user's uploaded models
   options = {
     id: userIdToDelete
@@ -262,7 +269,7 @@ app.post('/upload',upload.single('image'),(req, res, next) => {
     } else {
       file.write(__dirname + '/uploads/' + req.file.filename + ".png" , function(){
         obj.img.data = fs.readFileSync(path.join(__dirname + '/uploads/' + req.file.filename + ".png"));
-        imgModel.create(obj, (err, item) => {
+        Document.create(obj, (err, item) => {
             if (err) {
                 console.log(err);
             }
@@ -278,7 +285,7 @@ app.post('/upload',upload.single('image'),(req, res, next) => {
 });
 
 app.post("/delete-document", function(req,res){
-  imgModel.deleteOne({_id: req.body.documentToDelete},function(err){
+  Document.deleteOne({_id: req.body.documentToDelete},function(err){
     if(err){
       console.log(err);
       res.status(500).send('An error occurred', err);
@@ -294,7 +301,7 @@ app.post('/add-new-user',function(req,res){
       console.log("Error: EMAIL ALREADY EXIST");
       res.render("signUp",{msg: "Email is already exist."});
     }
-    else if((/^[a-zA-Z]+$/.test(req.body.firstname)) == false || (/^[a-zA-Z]+$/.test(req.body.lastname)) == false)
+    else if(!onlyLetters(req.body.firstname,req.body.lastname))
     {
       console.log("NO NUMBERS");
       res.render("signUp",{msg: "First and Last name must contain only letters."});
@@ -305,8 +312,8 @@ app.post('/add-new-user',function(req,res){
     else{
       bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
         var newUser = new User({
-          firstname: req.body.firstname.charAt(0).toUpperCase() + req.body.firstname.slice(1),
-          lastname: req.body.lastname.charAt(0).toUpperCase() + req.body.lastname.slice(1),
+          firstname: firstLetterUpperCase(req.body.firstname),
+          lastname: firstLetterUpperCase(req.body.lastname),
           email: req.body.email,
           password: hash,
           usertype: "user"
@@ -326,13 +333,13 @@ app.post('/send-to-model', async function(req,res){
   var docs = JSON.stringify(req.body);
   docs = JSON.parse(docs);
   const modelName = docs.model;
-  var target = await imgModel.findById(docs.target.id).exec();
+  var target = await Document.findById(docs.target.id).exec();
   saveDocumentFile(req.session.User, target.name, target.img.data);
   var compareDocsArray = [];
   var comparePoints = [];
   var compareHistory = [];
   for(var i=0; i<docs.compare.length; i++){
-    var compare = await imgModel.findById(docs.compare[i].id).exec();
+    var compare = await Document.findById(docs.compare[i].id).exec();
     compareHistory.push({name: compare.name});
     saveDocumentFile(req.session.User, compare.name, compare.img.data);
     compareDocsArray.push(fs.createReadStream(__dirname + '/public/userDocs/' + req.session.User + '/' + compare.name + '.png'));
@@ -393,7 +400,7 @@ app.post('/delete-history', async function(req,res){
 
 app.post('/search-history', async function(req,res){
   console.log(req.body);
-  userDocs = await imgModel.find({userID: req.session.User}, '_id name').exec();
+  userDocs = await Document.find({userID: req.session.User}, '_id name').exec();
   var query = {
     userID: req.session.User,
   }
@@ -517,6 +524,16 @@ function adminWhiteList(path){
   return path === '/admin-menu' || path === '/users' || path === "/delete-user" || path === '/admin-upload-model' || path === '/admin-model';
 }
 
+function onlyLetters(firstname, lastname){
+  if((/^[a-zA-Z]+$/.test(firstname)) == false || (/^[a-zA-Z]+$/.test(lastname)) == false){
+    return false
+  }else return true
+}
+
+function firstLetterUpperCase(name){
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
 async function deleteHistory(data){
   data = JSON.parse(data);
   var dataToDelete = [];
@@ -614,3 +631,6 @@ function deleteFileAndDirectory(dirName){
 app.listen(3000, function() {
   console.log("Server started on port 3000");
 });
+
+
+module.exports = { whiteList, adminWhiteList, onlyLetters, firstLetterUpperCase, Document, User, History, app};
