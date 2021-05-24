@@ -37,6 +37,9 @@ app.use(function (req, res, next) {
   else if(typeof req.session.User !== 'undefined' && req.session.usertype ==='admin' && adminWhiteList(req.path)){
       next();
   }
+  else if(env === 'test'){
+      next();
+  }
   else {
       //Return a response immediately
       res.render('login',{failed: false});
@@ -67,7 +70,7 @@ if(env === 'test'){
 } else {
   mongoDBurl = "mongodb+srv://liels8:123@cluster0.usywl.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 }
-console.log(env == 'test');
+
 mongoose.connect(mongoDBurl, {useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.set("useCreateIndex",true);
 
@@ -125,7 +128,7 @@ app.get('/my-documents', function(req,res){
             res.status(500).send('An error occurred', err);
         }
         else {
-            res.render('myDocuments', { items: items,name:req.session.name });
+            env === 'test' ? res.json({items: items}) : res.render('myDocuments', { items: items,name:req.session.name });
         }
     });
 });
@@ -144,9 +147,7 @@ app.get('/compare', function(req,res){
           console.error('error:', error); // Print the error
           console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
           console.log('body:',body); // Print the data received
-          modelsNames = JSON.parse(body)
-          modelsNames.push("Default-model");
-          modelsNames.reverse()
+          var modelsNames = modelsList(JSON.parse(body));
           res.render('compare', { docs: items ,models : modelsNames,name:req.session.name});
         });
       }
@@ -238,12 +239,14 @@ app.post('/confirm-login' ,function(req,res){
             req.session.name = user.firstname + " " + user.lastname;
             req.session.usertype = user.usertype;
 
-            if(user.usertype==="user")
-              res.redirect("/my-documents" );
+            if(user.usertype==="user"){
+              res.redirect("/my-documents");
+            }
             else
               res.redirect("/admin-model");
 
           } else {
+            res.status(500);
             res.render("login",{failed: true});
           }
         });
@@ -299,15 +302,18 @@ app.post('/add-new-user',function(req,res){
   User.findOne({email: req.body.email},function(err,usr){
     if(usr){
       console.log("Error: EMAIL ALREADY EXIST");
+      res.status(500);
       res.render("signUp",{msg: "Email is already exist."});
     }
     else if(!onlyLetters(req.body.firstname,req.body.lastname))
     {
+      res.status(500);
       console.log("NO NUMBERS");
       res.render("signUp",{msg: "First and Last name must contain only letters."});
     }else if(req.body.password != req.body.confirmpassword){
       console.log("WRONG PASSWORD");
-      res.render("signUp",{msg: "Incorrect password"});
+      res.status(500);
+      env === 'test' ? res.json({msg: "Incorrect password"}) : res.render("signUp",{msg: "Incorrect password"});
     }
     else{
       bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
@@ -321,7 +327,7 @@ app.post('/add-new-user',function(req,res){
         newUser.save();
         req.session.User = newUser._id;
         req.session.name = newUser.firstname +" "+newUser.lastname;
-        res.redirect("/my-documents");
+        res.redirect(200,"/my-documents");
       });
     }
   });
@@ -366,7 +372,7 @@ app.post('/send-to-model', async function(req,res){
     for(var i=0; i<compareHistory.length; i++){
       var result = parseFloat(body[i])*100;
       compareHistory[i].compatibility = result;
-      compareHistory[i].assessment = result < 50 ? "Not Same Writer" : result >= 50 && result < 75 ? "Could Be Same Writer" : "Same Writer";
+      compareHistory[i].assessment = modelAssesment(result);
     }
     console.log(compareHistory);
     var newRecord = new History({
@@ -426,8 +432,7 @@ app.route('/upload-model').post((req, res, next) => {
   req.pipe(req.busboy); // Pipe it trough busboy
 
   req.busboy.on('file', (fieldname, file, filename) => {
-      const fileType = filename.split('.')[1];
-      if( !(fileType === 'h5' || fileType ==='keras')){
+      if(notAcceptedFileType(filename)){
           console.log("Error Type model");
           res.redirect('/model');
           return;
@@ -482,8 +487,7 @@ app.post('/admin-upload-model',function(req,res){
   req.pipe(req.busboy); // Pipe it trough busboy
 
   req.busboy.on('file', (fieldname, file, filename) => {
-      const fileType = filename.split('.')[1];
-      if( !(fileType === 'h5' || fileType ==='keras')){
+      if(notAcceptedFileType(filename)){
           console.log("Error Type model");
           res.redirect('/model');
           return;
@@ -530,7 +534,24 @@ function onlyLetters(firstname, lastname){
   }else return true
 }
 
+function notAcceptedFileType(filename){
+  const fileType = filename.split('.')[1];
+  return !(fileType === 'h5' || fileType ==='keras')
+}
+
+function modelsList(models){
+  var modelsNames = models;
+  modelsNames.push("Default-model");
+  modelsNames.reverse();
+  return modelsNames;
+}
+
+function modelAssesment(result){
+  return result < 50 ? "Not Same Writer" : result >= 50 && result < 75 ? "Could Be Same Writer" : "Same Writer";
+}
+
 function firstLetterUpperCase(name){
+  name = name.toLowerCase();
   return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
@@ -633,4 +654,4 @@ app.listen(3000, function() {
 });
 
 
-module.exports = { whiteList, adminWhiteList, onlyLetters, firstLetterUpperCase, Document, User, History, app};
+module.exports = { whiteList, adminWhiteList, onlyLetters, firstLetterUpperCase,modelsList,notAcceptedFileType,modelAssesment, Document, User, History, app};

@@ -248,11 +248,12 @@ def checkPatch(img):
     boolDownRight = threshold < sumDownRight
 
     #check if at least 3 quarters are bigger than thershold
-    isValidPatch = (int(boolUpRight) + int(boolUpLeft) + int(boolDownLeft) + int(boolDownRight)) > 2
+    isValidPatch = checkQuarters(boolUpRight,boolUpLeft,boolDownLeft,boolDownRight)
 
     return isValidPatch
 
-
+def checkQuarters(q1,q2,q3,q4):
+    return (int(q1) + int(q2) + int(q3) + int(q4)) > 2
 
 def boundText(im):
     gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)

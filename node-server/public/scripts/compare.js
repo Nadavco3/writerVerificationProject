@@ -1,35 +1,38 @@
+const env = process.env.NODE_ENV;
+if(env!='test'){
+  let count = 0;
+  let resize;
+      var el = document.getElementById('crop-image');
+      resize = new Croppie(el, {
+          viewport: { width: 200, height: 100 },
+          boundary: { width: 450, height: 550 },
+          showZoomer: false,
+          enableResize: true,
+          enableOrientation: true,
+          mouseWheelZoom: 'ctrl'
+      });
 
-    let count = 0;
-    let resize;
-        var el = document.getElementById('crop-image');
-        resize = new Croppie(el, {
-            viewport: { width: 200, height: 100 },
-            boundary: { width: 450, height: 550 },
-            showZoomer: false,
-            enableResize: true,
-            enableOrientation: true,
-            mouseWheelZoom: 'ctrl'
-        });
+  var boundaryDiv = document.getElementsByClassName('cr-boundary')[0];
+      boundaryDiv.style.maxWidth = "450px";
+      boundaryDiv.style.maxHeight = "550px";
 
-    var boundaryDiv = document.getElementsByClassName('cr-boundary')[0];
-        boundaryDiv.style.maxWidth = "450px";
-        boundaryDiv.style.maxHeight = "550px";
+  var cropDiv = document.getElementById('crop');
+  // crop button
+  var cropButton = document.createElement('button');
+  cropButton.classList.add("btn", "btn-success");
+  cropButton.innerHTML = "Crop & Add";
+  cropButton.style.float = "left";
 
-    var cropDiv = document.getElementById('crop');
-    // crop button
-    var cropButton = document.createElement('button');
-    cropButton.classList.add("btn", "btn-success");
-    cropButton.innerHTML = "Crop & Add";
-    cropButton.style.float = "left";
+  // cancel button
+  var cancelButton = document.createElement('button');
+  cancelButton.classList.add("btn", "btn-danger");
+  cancelButton.innerHTML = "Cancel";
+  cancelButton.style.float = "right";
 
-    // cancel button
-    var cancelButton = document.createElement('button');
-    cancelButton.classList.add("btn", "btn-danger");
-    cancelButton.innerHTML = "Cancel";
-    cancelButton.style.float = "right";
+  cropDiv.appendChild(cropButton);
+  cropDiv.appendChild(cancelButton);
+}
 
-    cropDiv.appendChild(cropButton);
-    cropDiv.appendChild(cancelButton);
 
     function getDocuments(){
       var target = document.getElementById("targetImg");
@@ -291,25 +294,36 @@
       docWindow.document.write("<img width=" + docW + " height=" + docH + " src="+documentToView.src+">");
     }
 
-    function removeSelectedDocument(){
-      var docID = this.id;
-      var documentToDelete;
-      allDocs = document.getElementsByClassName("carousel-item");
-      for(var i=0; i<allDocs.length; i++){
-        if (allDocs[i].id === docID){
-            documentToDelete = allDocs[i];
+    function findItem(items,itemid){
+      var item;
+      for(var i=0; i<items.length; i++){
+        if (items[i].id === itemid){
+            item = items[i];
         }
       }
+      return item;
+    }
+
+    function getItemIndexToActive(items,itemToDelete){
+      var index;
+      for(var i=0; i<items.length; i++){
+        if (items[i] != itemToDelete){
+            index = i;
+            break;
+        }
+      }
+      return index;
+    }
+
+    function removeSelectedDocument(){
+      var docID = this.id;
+      allDocs = document.getElementsByClassName("carousel-item");
+      var documentToDelete = findItem(allDocs,docID);
       if(documentToDelete){
         console.log("document removed");
         if(documentToDelete.classList.contains("active") && count > 1){
-          for(var i=0; i<allDocs.length; i++){
-            if (allDocs[i] != documentToDelete){
-                allDocs[i].classList.add("active");
-                break;
-
-            }
-          }
+          var i = getItemIndexToActive(allDocs,documentToDelete);
+          allDocs[i].classList.add("active");
         }
         documentToDelete.remove();
         count--;
@@ -320,3 +334,5 @@
         }
       }
     }
+
+  module.exports = {findItem,getItemIndexToActive};
