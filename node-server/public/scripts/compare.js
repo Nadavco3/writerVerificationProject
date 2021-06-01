@@ -1,5 +1,4 @@
-const env = process.env.NODE_ENV;
-if(env!='test'){
+
   let count = 0;
   let resize;
       var el = document.getElementById('crop-image');
@@ -31,7 +30,6 @@ if(env!='test'){
 
   cropDiv.appendChild(cropButton);
   cropDiv.appendChild(cancelButton);
-}
 
 
     function getDocuments(){
