@@ -193,12 +193,11 @@ input[type="file"]{
   background-color: #fff;
   z-index: 99;
   text-align: center;
-
 }
 
 #loading-image {
   /* position: absolute; */
-	margin-top: 200px;
+	margin-top: 150px;
   top: 100px;
   left: 240px;
   z-index: 100;

@@ -61,7 +61,6 @@ def verifyWriter():
     else:
         model = keras.models.load_model(os.path.join(app.instance_path,  'models' + '/' + userID + '/' + modelName ))
     results = predictByModel(targetDoc,compareDocs,model)
-
     return results
 
 

@@ -1,5 +1,6 @@
 
   let count = 0;
+  let id_count=0;
   let resize;
       var el = document.getElementById('crop-image');
       resize = new Croppie(el, {
@@ -218,8 +219,8 @@
         document.getElementById("carouselExampleDark").style.display = "block";
         var doc = document.getElementById("compareDoc");
         var itemDiv = document.createElement("div");
-        itemDiv.classList.add("carousel-item");
-        itemDiv.id = count;
+        itemDiv.classList.add("carousel-item","carousel-doc");
+        itemDiv.id = id_count;
         if(count == 0){
           itemDiv.classList.add("active");
         }
@@ -232,7 +233,7 @@
         img.name = doc.options[doc.selectedIndex].dataset.name;
         img.dataset.id = doc.options[doc.selectedIndex].dataset.id;
         img.dataset.points = points;
-        img.id = count;
+        img.id = id_count;
 
         itemDiv.appendChild(img);
         var infoDiv = document.createElement("div");
@@ -247,11 +248,11 @@
         buttonView.innerHTML = "View&emsp;" + '<i class="fas fa-expand"></i>';
         buttonView.classList.add("btn", "btn-primary" ,"document-button");
         buttonView.onclick = openDocumentInNewWindow;
-        buttonView.id = count;
+        buttonView.id = id_count;
         var buttonRemove = document.createElement("button");
         buttonRemove.innerHTML = "Remove&emsp;" + '<i class="fas fa-trash-alt"></i>';
         buttonRemove.classList.add("btn", "btn-danger" ,"document-button");
-        buttonRemove.id = count;
+        buttonRemove.id = id_count;
         buttonRemove.onclick = removeSelectedDocument;
         infoDiv.appendChild(docTitle);
         infoDiv.appendChild(buttonView);
@@ -259,6 +260,7 @@
         itemDiv.appendChild(infoDiv);
         var items = document.getElementById("items");
         items.appendChild(itemDiv);
+        id_count++;
         count++;
         var counter = document.getElementById("count").innerHTML = "Total: " + String(count);
         closeCropWindow();
@@ -315,22 +317,48 @@
 
     function removeSelectedDocument(){
       var docID = this.id;
-      allDocs = document.getElementsByClassName("carousel-item");
-      var documentToDelete = findItem(allDocs,docID);
-      if(documentToDelete){
-        console.log("document removed");
-        if(documentToDelete.classList.contains("active") && count > 1){
-          var i = getItemIndexToActive(allDocs,documentToDelete);
-          allDocs[i].classList.add("active");
+      var documentToDelete;
+      var arr = [];
+      var index;
+      allDocs = document.getElementsByClassName("carousel-doc");
+      for(var i=0; i<allDocs.length; i++){
+        arr.push(allDocs[i])
+        if (allDocs[i].id === docID){
+            documentToDelete = allDocs[i];
+            index=i;
+        }
+      }
+      arr.splice(index,1)
+      documentToDelete.classList.remove("active")
+        if(arr.length>0){
+          arr[0].classList.add("active");
         }
         documentToDelete.remove();
+
+
+      // if(documentToDelete){
+      //   if(count > 1){
+      //     for(var i=0; i<allDocs.length; i++){
+      //       if (allDocs[i] != documentToDelete){
+      //         allDocs[i].classList.add("active");
+      //         break;
+
+      //       }
+      //     }
+      //   }
+
+        // if(count>1){
+        //   allDocs = document.getElementsByClassName("carousel-doc");
+        //   console.log(allDocs[0]);
+        //   allDocs[0].classList.add("active");
+        // }
         count--;
         var counter = document.getElementById("count").innerHTML = "Total: " + String(count);
         if(count == 0){
           document.getElementById("zero-message").style.display = "block";
           document.getElementById("carouselExampleDark").style.display = "none";
         }
-      }
-    }
 
-  module.exports = {findItem,getItemIndexToActive};
+
+
+}
