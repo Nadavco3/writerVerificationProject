@@ -19,7 +19,8 @@ const app = express();
 const fs_extra = require('fs-extra');
 
 
-
+var error_model_message="";
+var  admin_error_model_message="";
 
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({extended: true}));
@@ -60,15 +61,12 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 const saltRounds = 10;
 
-//mongo db connection
-// mongoDBurl = "mongodb+srv://admin-nadav:123@cluster0.x9oen.mongodb.net/testDB";
-// mongoDBurl = "mongodb+srv://liels8:123@cluster0.usywl.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 
 const env = process.env.NODE_ENV;
 if(env === 'test'){
-  mongoDBurl = "mongodb+srv://liels8:123@cluster0.usywl.mongodb.net/test?retryWrites=true&w=majority"
+  mongoDBurl = "mongodb+srv://liels8:"+process.env.DB_PASS+"@cluster0.usywl.mongodb.net/test?retryWrites=true&w=majority"
 } else {
-  mongoDBurl = "mongodb+srv://liels8:123@cluster0.usywl.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+  mongoDBurl = "mongodb+srv://liels8:"+process.env.DB_PASS+"@cluster0.usywl.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 }
 
 mongoose.connect(mongoDBurl, {useNewUrlParser: true, useUnifiedTopology: true });
@@ -175,7 +173,8 @@ app.get('/model', function(req,res){
     console.error('error:', error); // Print the error
     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
     console.log('body:', body); // Print the data received
-    res.render("model",{models :JSON.parse(body),name:req.session.name});
+    res.render("model",{models :JSON.parse(body),name:req.session.name,error:error_model_message});
+    error_model_message="";
   });
 
 });
@@ -327,7 +326,7 @@ app.post('/add-new-user',function(req,res){
         newUser.save();
         req.session.User = newUser._id;
         req.session.name = newUser.firstname +" "+newUser.lastname;
-        res.redirect(200,"/my-documents");
+        res.redirect("/my-documents");
       });
     }
   });
@@ -393,8 +392,16 @@ app.post('/export-to-csv', function(req,res){
   csvStream.pipe(writeStream).on('finish', () => {
     res.setHeader('Content-disposition', 'attachment; filename=' + req.session.User + '.csv');
     res.set('Content-Type', 'text/csv');
-    // res.sendFile(__dirname + '/' + req.session.User + '.csv');
-    res.download(__dirname + '/' + req.session.User + '.csv');
+    res.download(__dirname + '/' + req.session.User + '.csv',function(error){
+      if(error)
+        console.log(error);
+      try {
+        fs.unlinkSync(__dirname + '/' + req.session.User + '.csv')
+        //file removed
+      } catch(err) {
+        console.error(err)
+      }
+    });
   });
   createCSVfile(req.body.button, csvStream);
 });
@@ -434,6 +441,7 @@ app.route('/upload-model').post((req, res, next) => {
   req.busboy.on('file', (fieldname, file, filename) => {
       if(notAcceptedFileType(filename)){
           console.log("Error Type model");
+          error_model_message="Please upload file type h5 only";
           res.redirect('/model');
           return;
 
@@ -480,7 +488,8 @@ app.post('/delete-model', function(req,res){
 });
 
 app.get('/admin-model',function(req,res){
-  res.render('adminModel',{name:req.session.name});
+  res.render('adminModel',{name:req.session.name,error: admin_error_model_message});
+  admin_error_model_message="";
 });
 
 app.post('/admin-upload-model',function(req,res){
@@ -489,7 +498,8 @@ app.post('/admin-upload-model',function(req,res){
   req.busboy.on('file', (fieldname, file, filename) => {
       if(notAcceptedFileType(filename)){
           console.log("Error Type model");
-          res.redirect('/model');
+          admin_error_model_message="Please upload file type h5 only";
+          res.redirect('/admin-model');
           return;
 
       }

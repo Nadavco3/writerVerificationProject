@@ -328,16 +328,10 @@
       }
       arr.splice(index,1)
       documentToDelete.classList.remove("active") 
-      // setTimeout(function(){
         if(arr.length>0){
           arr[0].classList.add("active");
         }
-        setTimeout(function(){
-          if(arr.length>0){arr[0].classList.add("active")}
-
-        },500);
         documentToDelete.remove();
-      // },500)
       
     
       // if(documentToDelete){

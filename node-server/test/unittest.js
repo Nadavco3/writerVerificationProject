@@ -207,7 +207,7 @@ describe('post /add-new-user', () => {
         lastname: "testing"
      })
     .end((err, res) => {
-      expect(res.status).to.eq(200);
+      expect(res.status).to.eq(302);
       done();
     });
   });
